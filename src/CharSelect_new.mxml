@@ -35,6 +35,7 @@
 			private var selectedChar:String;
 			
 			public function startApp():void{
+				var ciccio:String = "";
 				var screenBounds:Rectangle = Screen.mainScreen.visibleBounds;
 				var w:int = width;
 				var h:int = height;
