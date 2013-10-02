@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300" creationComplete="initComp()">
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.net.dns.AAAARecord;
+			
+			import mx.core.IVisualElement;
+			import mx.states.OverrideBase;
+			
+			import spark.effects.easing.IEaser;
+			import spark.filters.GlowFilter;
+			private var speed:Number = 0;
+			private function initComp():void{
+				this.leftBtn.text = "<";
+				this.rigthBtn.text = ">";
+				var myGlow:spark.filters.GlowFilter = new GlowFilter();
+				myGlow.color = 0xFFFFFF
+				
+				this.rigthBtn.filters = [myGlow];
+				this.leftBtn.filters = [myGlow];
+			}
+			protected function leftBtn_mouseUpHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				trace("left")
+				
+				this.addEventListener(Event.ENTER_FRAME, startLeft)
+			}
+			protected function startLeft(eve:Event):void
+			{
+				if(speed<14)
+					speed +=2
+				if(this.charsSlider.x>980-this.charsSlider.width)
+					this.charsSlider.x -= speed
+			}
+			
+			protected function stopLeft(eve:MouseEvent):void
+			{
+				speed=0
+				trace("stop")
+				myMoveLeft.duration = 200
+				myMoveLeft.xFrom = this.charsSlider.x
+				myMoveLeft.xTo=this.charsSlider.x-10
+				if(this.charsSlider.x>980-this.charsSlider.width)
+				myMoveLeft.play();
+				this.removeEventListener(Event.ENTER_FRAME, startLeft)
+				
+			}
+			protected function rigthBtn_mouseUpHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				trace("right")
+				
+				this.addEventListener(Event.ENTER_FRAME, startRight)
+			}
+			
+			protected function startRight(eve:Event):void
+			{
+				if(speed<14)
+					speed +=2
+				if(this.charsSlider.x<0)
+				this.charsSlider.x +=speed
+			}
+			
+			protected function stopRight(eve:MouseEvent):void
+			{
+				speed = 0
+				trace("stop")
+				myMoveRight.duration = 200
+				myMoveRight.xFrom = this.charsSlider.x
+				myMoveRight.xTo=this.charsSlider.x+10
+				if(this.charsSlider.x<0)
+					myMoveRight.play();
+				this.removeEventListener(Event.ENTER_FRAME, startRight)
+			
+			}
+			
+			public function addChar(element:IVisualElement):void
+			{
+				
+				this.charsSlider.addElement(element)
+					trace(this.charsSlider.width)
+				if(this.charsSlider.numElements >3)
+				{
+					rigthBtn.visible = true
+					leftBtn.visible = true					
+				}
+			}
+			
+			import mx.events.FlexEvent;
+			
+			/* protected function initComponet(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.useHandCursor = true
+				this.buttonMode = true
+				//this.horizontalAlign="center"
+				source = 'file://'+File.applicationDirectory.nativePath+'/assets/arrow.png'
+				
+			}
+			public function set source(value:String):void
+			{
+				
+				imgLeft.source = value
+				imgRight.source = value
+			} */
+		
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Move id="myMoveLeft" target="{charsSlider}" />
+		<s:Move id="myMoveRight" target="{charsSlider}" />
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup id="charsSlider" width="100%" height="100%" x="0"  horizontalAlign="center" />
+	<s:TextArea id="leftBtn" width="100" height="100%" left="0" fontSize="120" text="" 
+				verticalAlign="middle" fontFamily="BaseFont" color="#ffffff" mouseOut="stopRight(event)" 
+				contentBackgroundAlpha="0" mouseOver="rigthBtn_mouseUpHandler(event)" borderVisible="false" 
+				selectable="false" editable="false"
+				visible="false"/>
+	
+	<s:TextArea id="rigthBtn" width="100" height="100%" right="0" fontSize="120" text="" 
+				verticalAlign="middle" fontFamily="BaseFont" textAlign="right" color="#ffffff" 
+				mouseOut="stopLeft(event)" contentBackgroundAlpha="0" mouseOver="leftBtn_mouseUpHandler(event)" 
+				borderVisible="false" selectable="false" editable="false"
+				visible="false"/>
+</s:Group>

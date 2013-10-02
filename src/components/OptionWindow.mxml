@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="317" height="577">
+	<fx:Script>
+		<![CDATA[
+			import spark.filters.BlurFilter;
+			import spark.filters.DropShadowFilter;
+			import spark.filters.GlowFilter;
+			private function setGraphics():void
+			{
+				
+				
+				
+			}
+			
+			protected function bgImg_completeHandler(event:Event):void
+			{
+			
+				var myShadow:DropShadowFilter = new DropShadowFilter();
+					myShadow.angle =90
+				var myGlow:BlurFilter = new BlurFilter();
+				myGlow.blurX = 2
+				myGlow.blurY = 2
+				//myGlow.color = 0xFFFFFF
+				this.bgImg.filters = [myShadow]
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BitmapImage id="bgImg"  fillMode="scale" height="90%" verticalCenter="0" x="0" y="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/optSfondo.png'}" complete="bgImg_completeHandler(event)"
+				    ioError="{trace(File.applicationDirectory.nativePath+'/assets/optSfondo.jpg')}" />
+		<s:HGroup bottom="10" horizontalCenter="0" id="pathTool"
+				  verticalAlign="contentJustify" visible="true">
+			<s:TextArea id="skyPath" width="400" height="20" borderVisible="false" color="#FDF9F9" visible="false"
+						contentBackgroundColor="#726B6B" verticalAlign="middle"
+						fontWeight="bold"
+						contentBackgroundAlpha="0.0" textAlign="right" selectable="false" editable="false"/>
+			<s:Button id="pathBtn" label="Select Path" visible="true"
+					  click=""/>
+		</s:HGroup>
+		<s:Label id="labelText" fontSize="16" textAlign="center" visible="true"
+				 color="#FDFCFC" fontFamily="BaseFont" bottom="140"
+				 horizontalCenter="0" 
+				 verticalAlign="middle"
+		/>
+</s:Group>

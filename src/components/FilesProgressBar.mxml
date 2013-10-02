@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300">
+	<fx:Script>
+		<![CDATA[
+			private static const SAVE_GAME_PATH:String = "My Games/Skyrim/";
+			
+			private var fileDone:Number = 0;
+			private var totalFiles:Number = 0;
+			private var _files:Array;
+			private var aspetta:Boolean = false;
+			private var _isComplete:Boolean = false;
+			private var copyTo:String;
+			private var copyFrom:String;
+			private var deleteFrom:String;
+			
+			[Bindable(event="COPY_COMPLETE")]
+			public function get isComplete():Boolean
+			{
+				return _isComplete
+			}
+			
+			public function set isComplete(value:Boolean):void
+			{
+				_isComplete = value
+			}
+			
+			
+			
+			public function startProcessForBackUp(from:String, to:String):void
+			{
+				var sourceDir:File = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath(from); 
+				var files:Array = sourceDir.getDirectoryListing()
+				copyFrom = from
+				copyTo = to
+				pBar.visible = true
+				pBar.label = "Create backup directory"
+				
+				var bkpDir:File = File.documentsDirectory
+				bkpDir = bkpDir.resolvePath(to);
+				if(!bkpDir.exists)
+					bkpDir.createDirectory()
+				fileDone = 0;		
+				totalFiles = files.length-1
+				_files = files
+				aspetta = false;
+				pBar.setProgress(0, totalFiles);
+				processForCopy()
+				
+				
+				
+			}
+			
+			public function startForCopy(from:String, to:String):void
+			{
+				
+				var sourceDir:File = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath(from); 
+				var files:Array = sourceDir.getDirectoryListing()
+				copyFrom = from
+				copyTo = to
+				pBar.visible = true
+				pBar.label = "Copy files"
+				fileDone = 0;
+				totalFiles = files.length-1
+				_files = files
+				aspetta = false;
+				pBar.setProgress(0, totalFiles);
+				processForCopy()
+			}
+			
+			
+			private function processForCopy():void{
+				pBar.label = "Copy files.."
+				if(!aspetta)
+				{
+					if(fileDone<_files.length)
+					{
+						var whereToCopy = File.documentsDirectory;
+						whereToCopy = whereToCopy.resolvePath(copyTo+"/"+_files[fileDone].name);
+						copyThisFile(_files[fileDone],whereToCopy)
+						
+					}else
+					{
+						
+						trace("processForCopy completo");
+						pBar.label = "Complete"
+						_isComplete = true
+						dispatchEvent(new Event("COPY_COMPLETE"))
+					}
+				}
+				else
+				{
+					fileDone--
+				}	
+			}
+			
+			private function copyThisFile(file:File, directory:File):void
+			{
+				
+				file.addEventListener(Event.COMPLETE, progressForCopy)
+				if(!directory.exists)
+				{
+					aspetta = true
+					file.copyToAsync(directory)
+				}
+				else
+				{
+					fileDone++
+						processForCopy()
+				}
+				
+			}
+			
+			private function progressForCopy(eve:Event):void
+			{
+				fileDone++
+					pBar.setProgress(fileDone, totalFiles)
+				aspetta = false
+				processForCopy()
+				
+			}
+			
+			public function startProcessForChar(from:String):void
+			{
+				var sourceDir:File = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath(from); 
+				var files:Array = sourceDir.getDirectoryListing()
+				
+				pBar.visible = true
+				pBar.label = "Create backup directory"
+				
+				fileDone = 0
+				totalFiles = files.length-1
+				_files = files
+				aspetta = false;
+				pBar.setProgress(0, totalFiles);
+				processForChar()
+			}
+			
+			
+			private function processForChar():void
+			{
+				pBar.label = "Copy files in character folders"
+				if(!aspetta)
+				{
+					if(fileDone<_files.length)
+					{
+						var directory:File = File.documentsDirectory
+						directory = directory.resolvePath("My Games/Skyrim/Chars/"+findName(_files[fileDone].name)+"/"+_files[fileDone].name);
+						copyThisFileForChar(_files[fileDone],directory)
+						
+						
+					}else
+					{
+						
+						trace("processForChar completo");
+						pBar.label = "Complete"
+						_isComplete = true
+						dispatchEvent(new Event("COPY_COMPLETE"))
+					}
+				}
+				else
+				{
+					fileDone--
+				}
+				
+			}
+			
+			private function copyThisFileForChar(file:File, directory:File):void
+			{
+				
+				file.addEventListener(Event.COMPLETE, progressForChar)
+				if(String(_files[fileDone].name).search("Save")>-1 || String(_files[fileDone].name).search("Salva")>-1)
+				{
+					if(!directory.exists)
+					{
+						aspetta = true
+						file.copyToAsync(directory)
+					}
+					else
+					{
+						fileDone++
+							processForChar()
+					}
+				}else
+				{
+					fileDone++
+						processForChar()
+					
+				}
+				
+				
+			}
+			
+			private function progressForChar(eve:Event):void
+			{
+				fileDone++
+					pBar.setProgress(fileDone, totalFiles)
+				aspetta = false
+				processForChar()
+				
+			}
+			
+			public function startProcessDeleteFrom(from:String):void
+			{
+				deleteFrom = from
+				var sourceDir:File = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath(deleteFrom); 
+				var files:Array = sourceDir.getDirectoryListing()
+				
+				pBar.visible = true
+				pBar.label = "Deleting files..."
+				
+				fileDone = 0
+				totalFiles = files.length-1
+				_files = files
+				aspetta = false;
+				pBar.setProgress(0, totalFiles);
+				procesForDelete()
+				
+				
+			}
+			
+			private function procesForDelete():void
+			{
+				
+				if(!aspetta)
+				{
+					if(fileDone<_files.length)
+					{
+						deleteThis(_files[fileDone])
+					}else
+					{
+						
+						trace("procesForDelete complete");
+						pBar.label = "Complete"
+						_isComplete = true
+						dispatchEvent(new Event("COPY_COMPLETE"))
+					}
+				}
+				else
+				{
+					fileDone--
+				}
+			}
+			
+			private function deleteThis(file:File):void
+			{
+				
+				file.addEventListener(Event.COMPLETE, progressForDelete)
+				if(String(file.name).search("Save")>-1 || String(file.name).search("Salva")>-1)
+				{
+					if(file.exists)
+					{
+						aspetta = true
+						file.deleteFileAsync()
+					}
+					else
+					{
+						fileDone++
+							procesForDelete()
+					}
+				}else
+				{
+					fileDone++
+						procesForDelete()
+					
+				}
+				
+				
+			}
+			
+			private function progressForDelete(eve:Event):void
+			{
+				fileDone++
+					pBar.setProgress(fileDone, totalFiles)
+				aspetta = false
+				procesForDelete()
+				
+			}
+			
+			private function findName(str:String):String
+			{
+				var i:Number;
+				i = str.indexOf("-")
+				//trace('i ' + i)
+				var tmpStr:String = str.substr(i+2,str.length-1)
+				//trace('tmpStr ' + tmpStr)
+				i = tmpStr.indexOf(" ")
+				//	trace('i ' + i)
+				return tmpStr.substr(0, i)
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<mx:ProgressBar id="pBar" mode="manual" width="100%" label="Checking files.." labelPlacement="top" bottom="0" color="#FFFFFF" visible="false"/>
+</s:Group>

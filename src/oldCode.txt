@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   currentState="splash" showStatusBar="false" windowComplete="initapp()"
+					   backgroundColor="#726B6B" xmlns:components="components.*">
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@font-face{
+			src:url("font/TrajanusBricks.ttf");
+			fontFamily: "BaseFont";
+			embed-as-cff : true;
+			fontWeight: normal;
+		}
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+			import org.osmf.events.TimeEvent;
+			[SWF(frameRate="60")]
+			
+			import components.BtnChar;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.events.ResizeEvent;
+			import mx.graphics.BitmapFillMode;
+			import mx.graphics.GradientEntry;
+			import mx.graphics.LinearGradient;
+			
+			import spark.core.MaskType;
+			import spark.filters.DropShadowFilter;
+			import spark.primitives.Graphic;
+			import spark.primitives.Rect;
+			
+			private var _title:String = "";
+			private var loadedContents:uint = 0;
+			private var totalContents:uint = 0;
+			
+			private var filesDirectory:Array;
+			private var selected:String ="";
+			
+			private var timer:Timer = new Timer(1000, 5);
+			public function initapp():void{
+				
+				visible = false
+				var screenBounds:Rectangle = Screen.mainScreen.visibleBounds;
+				var w:int = width;
+				var h:int = height;
+				
+				var x:int = screenBounds.x + ((screenBounds.width-w)/2);
+				var y:int = screenBounds.y + ((screenBounds.height-h)/2);
+				stage.nativeWindow.x = x;
+				stage.nativeWindow.y = y;
+				visible = true;
+				timer.addEventListener(TimerEvent.TIMER_COMPLETE, changeState)
+					timer.start()
+				
+			}
+			
+			private function changeState(eve:TimerEvent):void
+			{
+				currentState = "config"
+				startApp()
+			}
+			
+			public function startApp():void{
+				
+				var ini:File = File.documentsDirectory.resolvePath("My Games/Skyrim/CharSelect.ini");
+				if(ini.exists)
+				{
+					
+					loadFileIni()
+					this.pathBtn.label = "Change Directory";
+				}
+				
+				
+			}
+			
+			protected function selectFile(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+				skyPath.text = event.target.nativePath
+				var ini:File = File.documentsDirectory.resolvePath("My Games/Skyrim/CharSelect.ini");
+				var stream:FileStream = new FileStream();
+				stream.open(ini, FileMode.WRITE);
+				stream.writeUTFBytes(event.target.nativePath);
+				stream.close();
+				//bkpfiles()
+				readAndSetI()
+				
+			}
+			
+			private function loadFileIni():void
+			{
+				var ini:File = File.documentsDirectory.resolvePath("My Games/Skyrim/CharSelect.ini");
+				var url:URLRequest = new URLRequest(ini.url);
+				
+				// Define the URLLoader.
+				var loader:URLLoader = new URLLoader();
+				loader.load(url);
+				pathBtn.visible = false
+				// Listen for when the file has finished loading.
+				loader.addEventListener(Event.COMPLETE, loaderComplete);
+				
+			}
+			
+			private function loaderComplete(e:Event):void
+			{
+				// The output of the text file is available via the data property
+				// of URLLoader.
+				trace(e.currentTarget.data);
+				this.skyPath.text = e.currentTarget.data
+				
+				/*this.skyPath.width = this.skyPath.widthInChars */
+				/******************		readAndSet() ****************************/
+				readAndSetI()
+			}
+			
+			
+		/*** create back up files folder ***/	
+			
+			private function bkpfiles():void
+			{
+				
+				var bkpDir:File = File.documentsDirectory
+				bkpDir = bkpDir.resolvePath("My Games/Skyrim/BKP");
+				if(!bkpDir.exists)
+					bkpDir.createDirectory()
+				
+				var sourceDir:File = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Saves"); 
+				filesDirectory = sourceDir.getDirectoryListing()
+				
+				loadedContents = 0
+				totalContents = filesDirectory.length
+				this.infoloading.text = "Checking files..."
+				copyFile();
+				
+			}
+			
+			private function copyFile():void
+			{
+//				pBar.visible = true
+				var bkpDir:File;
+					
+				if(loadedContents<filesDirectory.length)
+				{
+					bkpDir = File.documentsDirectory;
+					bkpDir = bkpDir.resolvePath("My Games/Skyrim/BKP/"+filesDirectory[loadedContents].name);
+					chekFile(filesDirectory[loadedContents], bkpDir)
+				}
+				else
+				{
+					
+					createCharFolder()
+				}
+				
+			}
+			
+			private function chekFile(file:File, destination:File):void
+			{
+				file.addEventListener(Event.COMPLETE, onContentLoaded)
+				file.copyToAsync(destination)
+				
+			}
+			protected function onContentLoaded(event:Event):void{
+				trace("C")
+				loadedContents++
+//					this.pBar.setProgress(loadedContents, totalContents);
+				copyFile();
+			}
+
+			private var _loadFile:File;
+			
+			protected function closeEvent(event:MouseEvent):void
+			{
+				nativeApplication.exit();
+			}
+			
+			protected function minimizeEvent(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				nativeWindow.minimize()
+			}
+			
+			
+			private function createCharFolder():void
+			{
+				infoloading.text = "create chars directories..."
+				var charName:Array = new Array()
+				for (var i:uint = 0; i < filesDirectory.length; i++)
+				{
+					//trace(String(files[i].name).search("Save"))
+					if(String(filesDirectory[i].name).search("Save")>-1 || String(filesDirectory[i].name).search("Salva")>-1)
+					{
+						if(charName.indexOf(findName(filesDirectory[i].name))<0)
+							charName.push(findName(filesDirectory[i].name))
+					}
+				}
+				
+				for(var i:uint = 0; i<charName.length; i++)
+				{
+					var directory:File = File.documentsDirectory;
+					directory = directory.resolvePath("My Games/Skyrim/Chars/"+charName[i]);
+					if(!directory.exists)
+						directory.createDirectory()
+					
+				}
+				infoloading.text = "move files in chars directories... wait! " 
+//				pBar.visible = false
+				
+				for (var i:uint = 0; i < filesDirectory.length; i++)
+				{
+					
+					if(String(filesDirectory[i].name).search("Save")>-1 || String(filesDirectory[i].name).search("Salva")>-1)
+					{
+						var directory:File = File.documentsDirectory
+						directory = directory.resolvePath("My Games/Skyrim/Chars/"+findName(filesDirectory[i].name)+"/"+filesDirectory[i].name);
+						if(!directory.exists)
+							filesDirectory[i].copyTo(directory)
+					}
+					
+				}
+				goToUse()
+			}
+			
+			/* private function disposeChar():void{
+				infoloading.text = "move files in chars directories... " +filesDirectory.length	
+				
+				
+				if(loadedContents<filesDirectory.length)
+				{
+					trace(filesDirectory[loadedContents].name)
+					checkSaveFile()
+					
+				}
+			
+						
+			}
+			
+			private function checkSaveFile():void
+			{
+				filesDirectory[loadedContents].addEventListener(Event.COMPLETE, contentCopy)
+				if(String(filesDirectory[loadedContents].name).search("Save")>-1 || String(filesDirectory[loadedContents].name).search("Salva")>-1)
+				{
+					trace("qui1")
+					var directory:File = File.documentsDirectory
+					directory = directory.resolvePath("My Games/Skyrim/Chars/"+findName(filesDirectory[loadedContents].name)+"/"+filesDirectory[loadedContents].name);
+					if(!directory.exists)
+					{
+						trace("qui2")
+						
+						filesDirectory[loadedContents].copyTo(directory)
+					}
+					else
+					{
+						filesDirectory[loadedContents].dispatchEvent(new Event(Event.COMPLETE))
+					}
+						
+				}
+				else
+				{
+					filesDirectory[loadedContents].dispatchEvent(new Event(Event.COMPLETE))
+				}
+				
+				
+			}
+			
+			private function contentCopy(eve:Event):void{
+				
+				loadedContents++
+				this.pBar.setProgress(loadedContents, totalContents);
+				disposeChar()
+				if(loadedContents<filesDirectory.length)
+				{
+					goToUse()
+				}
+			} */
+			
+			private function readAndSetI():void
+			{
+				this.infoloading.text = "Checking files..."
+				pathTool.visible = false
+				
+				timer.removeEventListener(TimerEvent.TIMER_COMPLETE, changeState)
+				timer = new Timer(500,1)
+				timer.addEventListener(TimerEvent.TIMER_COMPLETE, readAndSetII)
+					timer.start()
+			}
+			
+			private function readAndSetII(eve:TimerEvent):void
+			{
+				
+				var bkpDir:File = File.documentsDirectory
+				bkpDir = bkpDir.resolvePath("My Games/Skyrim/BKP");
+				if(!bkpDir.exists)
+				bkpDir.createDirectory()
+				
+				var sourceDir:File = File.documentsDirectory
+					sourceDir = sourceDir.resolvePath("My Games/Skyrim/Saves"); 
+				var files:Array = sourceDir.getDirectoryListing()
+					
+				if(files.length <1)
+					infoloading.text = "you don't have any charcters"
+				else
+				{
+				
+					for (var i:uint = 0; i < files.length; i++)
+					{
+							
+							//trace("loadedContents " + loadedContents)
+							bkpDir = File.documentsDirectory;
+							bkpDir = bkpDir.resolvePath("My Games/Skyrim/BKP/"+files[i].name);
+							//files[i].addEventListener(Event.COMPLETE, onContentLoaded)
+							if(!bkpDir.exists)
+								files[i].copyToAsync(bkpDir)
+								loadedContents++
+							/* loadedContents+=unitNumber(totalContents)
+							this.pBar.setProgress(loadedContents, totalContents); */
+						
+					}
+					
+					var charName:Array = new Array()
+						for (var i:uint = 0; i < files.length; i++)
+						{
+							//trace(String(files[i].name).search("Save"))
+							if(String(files[i].name).search("Save")>-1 || String(files[i].name).search("Salva")>-1)
+							{
+								if(charName.indexOf(findName(files[i].name))<0)
+									charName.push(findName(files[i].name))
+							}
+						}
+						if(charName.length>0)
+							{infoloading.text = "create chars directories..."
+							for(var i:uint = 0; i<charName.length; i++)
+							{
+								var directory:File = File.documentsDirectory;
+								directory = directory.resolvePath("My Games/Skyrim/Chars/"+charName[i]);
+								if(!directory.exists)
+								directory.createDirectory()
+		
+							}
+							
+							infoloading.text = "move files in chars directories... wait! " 
+							for (var i:uint = 0; i < files.length; i++)
+							{
+								
+								if(String(files[i].name).search("Save")>-1 || String(files[i].name).search("Salva")>-1)
+								{
+									var directory:File = File.documentsDirectory
+									directory = directory.resolvePath("My Games/Skyrim/Chars/"+findName(files[i].name)+"/"+files[i].name);
+									if(!directory.exists)
+										files[i].copyTo(directory)
+								}
+								
+							}
+							goToUse()
+						}else
+						{
+							infoloading.text = "you dont'have any characters"
+						}
+				}
+					
+			}
+			
+			private function goToUse():void
+		{
+				pathTool.visible = true;
+			//pBar.visible = false
+				currentState="use"
+				var sourceDir:File = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Chars")
+				var files:Array = sourceDir.getDirectoryListing()
+				
+				for(var i:uint = 0; i<files.length; i++)
+				{
+					if(String(files[i].name).search(".")>-1)
+					{
+						var tmpBtn:BtnChar = new BtnChar()
+						tmpBtn.id = files[i].name+"Btn"
+						tmpBtn.label = files[i].name
+						tmpBtn.width = 256
+						tmpBtn.height = 256
+						tmpBtn.addEventListener(MouseEvent.CLICK, selectCharI);
+						this.chars.addChar(tmpBtn)
+					}
+				}
+				sourceDir = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Saves"); 
+				files = sourceDir.getDirectoryListing()
+					
+				for (var i:uint = 0; i < files.length; i++)
+				{
+					
+					if(String(files[i].name).search("Save")>-1 || String(files[i].name).search("Salva")>-1)
+					{
+						startSkyrim.enabled = true
+						labelText.text ="Selected Character: " + findName(files[i].name)
+						break;
+					}
+					else
+					startSkyrim.enabled = false
+				}
+			}
+			
+			private function selectCharI(eve:MouseEvent):void
+			{
+				labelText.text = "deleting files... copy " + eve.currentTarget.label + " files"
+				selected = eve.currentTarget.label
+				pathTool.visible = false
+				
+				timer.removeEventListener(TimerEvent.TIMER_COMPLETE, changeState)
+				timer = new Timer(500,1)
+				timer.addEventListener(TimerEvent.TIMER_COMPLETE, readAndSetII)
+				timer.start()
+			}
+			
+			private function selectCharII(eve:TimerEvent):void{
+				
+//				pBar.label = "deleting...";
+				
+				trace("copya quelli di " + selected)
+				var sourceDir:File = File.documentsDirectory
+				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Saves"); 
+				var files:Array = sourceDir.getDirectoryListing()
+				for (var i:uint = 0; i < files.length; i++)
+				{
+					if(String(files[i].name).search("Save")>-1 || String(files[i].name).search("Salva")>-1)
+					{
+						var file:File = File.documentsDirectory
+						file = file.resolvePath("My Games/Skyrim/Saves/"+files[i].name)
+						if(file.exists)
+							file.deleteFile()
+						
+					}
+				}
+				sourceDir = File.documentsDirectory
+				//trace(eve.currentTarget.label+"...")
+				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Chars/"+selected); 
+				files = sourceDir.getDirectoryListing()
+				//trace(files.length)
+//					pBar.visible = true
+					loadedContents = 0
+					totalContents = files.length
+				for (var i:uint = 0; i < files.length; i++)
+				{
+					
+					if(String(files[i].name).search("Save")>-1 || String(files[i].name).search("Salva")>-1)
+					{
+						/*var sourceFile:File = File.documentsDirectory;
+						sourceFile = sourceFile.resolvePath("AIR Test/test1.txt");
+						var destination:File = File.documentsDirectory.resolvePath(File.applicationDirectory.nativePath+"/Saves")
+						destination = destination.resolvePath("Apollo Test/test2.txt");*/
+						sourceDir = File.documentsDirectory
+						//trace(eve.currentTarget.label+"...")
+						sourceDir = sourceDir.resolvePath("My Games/Skyrim/Chars/"+selected+"/"+files[i].name); 
+						var directory:File = File.documentsDirectory;
+						directory = directory.resolvePath("My Games/Skyrim/Saves/"+files[i].name)
+						if(!directory.exists)
+							sourceDir.copyTo(directory)
+					}
+					
+				}
+				//setTitle(eve.currentTarget.label)
+				startSkyrim.enabled = true;
+				labelText.text ="Selected Character: " + selected
+				
+			}
+			
+			private function findName(str:String):String
+			{
+				var i:Number;
+				i = str.indexOf("-")
+					//trace('i ' + i)
+				var tmpStr:String = str.substr(i+2,str.length-1)
+				//trace('tmpStr ' + tmpStr)
+				i = tmpStr.indexOf(" ")
+			//	trace('i ' + i)
+				return tmpStr.substr(0, i)
+				
+			}
+			
+			
+			
+			protected function chooseSkyrimPath(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+//				pBar.visible = true
+				_loadFile = new File();
+				_loadFile.addEventListener(Event.SELECT, selectFile);
+				_loadFile.browseForDirectory("Select Skyrim application folder");
+			}
+			
+			
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+
+				// TODO Auto-generated method stub
+				var myApp:File = new File(skyPath.text)
+				myApp = myApp.resolvePath("skse_loader.exe");
+				trace("TODO Cambiare l'esecuzione")
+				var myAppProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+				var myAppProcess = new NativeProcess();
+				myAppProcessStartupInfo.executable = myApp;
+				
+				myAppProcess.addEventListener(KeyboardEvent.KEY_DOWN, reportKeyDown);
+				myAppProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, dataHandler); 
+				
+				myAppProcess.start(myAppProcessStartupInfo);
+				
+				
+			}
+			private function reportKeyDown(event:KeyboardEvent):void 
+			{ 
+				trace("Key Pressed: " + String.fromCharCode(event.charCode) +         " (character code: " + event.charCode + ")"); 
+			} 
+			
+			private function dataHandler(event) 
+			{ 
+				trace("......."); 
+				//bytes.writeBytes(process.standardOutput.readBytes(process.standardOutput.bytesAvailable); 
+			}
+			
+			protected function settingsState(event:MouseEvent):void
+			{
+				trace("apri settings")
+				
+			}
+			
+			protected function resizeImg(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+				bgImg.width = width
+				bgImg.height = height
+				//bgImg.fillMode = BitmapFillMode.SCALE				
+			}
+			
+			
+			
+			private function unitNumber(total:Number):Number
+			{
+				
+				return Math.round(total/100)
+			}
+			
+			protected function bgImg_completeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				splashScreen.width = 980
+				splashScreen.height = 800
+			}
+			
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="use"/>
+		<s:State name="splash" />
+		<s:State name="config" />
+	</s:states>
+	
+	
+	
+		<s:transitions>
+		<s:Transition id="fade" toState="splash" fromState="*">
+				<s:Fade />
+		</s:Transition>
+			<s:Transition id="toAnyFromAny" fromState="*" toState="*"> 
+				<s:Sequence id="t2" targets="{[splashScreen,titleSkyrim]}"> 
+					<s:SetAction target="{splashScreen}" property="includeInLayout"/>
+					<s:SetAction target="{titleSkyrim}" property="includeInLayout"/> 
+					
+					
+					<s:Fade duration="500"/> 
+				</s:Sequence> 
+			</s:Transition> 
+			</s:transitions>
+	
+	<s:BitmapImage id="bgImg"  fillMode="scale" verticalCenter="0" horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
+				   complete="resizeImg(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}" includeInLayout="false" includeInLayout.splash="true"/>
+	
+	<s:BitmapImage id="splashScreen"  fillMode="scale"  includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
+				   complete="bgImg_completeHandler(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}"/>
+	<s:VGroup verticalCenter="0" horizontalCenter="0" horizontalAlign="center" id="titleSkyrim"
+			 width="100%">
+	<s:Label id="skyrimTitle" fontSize="65" text="skyrim" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
+			 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0"/>
+		<s:Line id="linea" xFrom="{skyrimTitle.x}" xTo="{skyrimTitle.width}" yFrom="0" yTo="0" includeIn="splash" includeInLayout="false" includeInLayout.splash="true">
+			<!-- Define the border color of the line. -->
+			<s:stroke>
+				<s:SolidColorStroke color="0xffffff" weight="3" caps="round"/>
+			</s:stroke>
+		</s:Line>
+	<s:Label id="skyrimSubTitle" fontSize="24" text="select character tool" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
+			 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0" />
+		
+	</s:VGroup>
+	<s:HGroup width="100%" horizontalAlign="right" top="5" right="5">
+		<components:BtnSimple width="20" height="20" toolTip="Settings" click="settingsState(event)" useHandCursor="true"/>
+		<s:TextArea toolTip="Minimize" id="minimizeBtn" width="20" click="minimizeEvent(event)" text="_"
+					height="20" borderColor="#000000" color="#000000"
+					contentBackgroundColor="#726B6B" fontWeight="bold"
+					textAlign="center" verticalAlign="middle" selectable="false" useHandCursor="true" buttonMode="true" editable="false"/>
+		<s:TextArea toolTip="Exit" id="closeBtn" width="20" click="closeEvent(event)" text="X"
+					height="20" borderColor="#000000" color="#000000"
+					contentBackgroundColor="#726B6B" fontWeight="bold"
+					textAlign="center" verticalAlign="middle" selectable="false" useHandCursor="false" buttonMode="true" editable="false"/>
+	</s:HGroup>
+	<s:TextArea includeIn="use" height="20" borderVisible="false" color="#FDF9F9" width="100%" top="150"
+				contentBackgroundAlpha="0.0" contentBackgroundColor="#726B6B" editable="false" selectable="false"
+				text="select Character:" textAlign="center" verticalAlign="middle" fontFamily="BaseFont" />
+	<s:VGroup left="0"
+			   right="0" top="180" horizontalAlign="center">
+		
+		<!--<s:Button id="btn1" width="100" label="readAndSet" click="readAndSet(event)" />-->
+		<components:CharSlider id="chars" includeIn="use" width="{width}" />
+		<!--<s:HScrollBar width="400" viewport="{chars}"/>-->
+					<!--  maximum="780"
+					  stepSize="50" 
+					  pageSize="100"  
+					  repeatDelay="1000" 
+					  repeatInterval="500" />-->
+	</s:VGroup>
+	<s:HGroup bottom="10" horizontalCenter="0" id="pathTool"
+			  verticalAlign.use="contentJustify" visible.splash="false">
+		<s:TextArea id="skyPath" width="400" height="20" borderVisible="false" color="#FDF9F9"
+					contentBackgroundColor="#726B6B" verticalAlign="middle"
+					fontWeight.config="bold"
+					contentBackgroundAlpha.use="0.0" textAlign="right" selectable="false" editable="false"/>
+		<s:Button id="pathBtn" label="Select Path"
+				  click="chooseSkyrimPath(event)"/>
+	</s:HGroup>
+	<s:Label id="labelText" fontSize="16" textAlign="center" visible="true" includeIn="use"
+			color="#FDFCFC" fontFamily="BaseFont" bottom="145"
+			horizontalCenter="0" 
+			 verticalAlign="middle"/>
+	<components:StartButton includeIn="use" bottom="40" width="100" height="100" label="start" id="startSkyrim"
+							click="button1_clickHandler(event)"
+							horizontalCenter="0"/>
+	<s:Label id="infoloading" fontSize="24" textAlign="center" color="#ffffff" fontFamily="BaseFont" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
+<!--	<mx:ProgressBar id="pBar" label="" labelPlacement="top" mode="manual" minimum="0"  width="{980}" bottom="0" horizontalCenter="0" visible="false" color="0xffffff" />-->
+</s:WindowedApplication>

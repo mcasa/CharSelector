@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300" creationComplete="initComponet(event)">
+	<fx:Script>
+		<![CDATA[
+			import flash.filters.*;
+			
+			import mx.events.FlexEvent; 
+			
+			private var myBlur:BlurFilter = new BlurFilter();
+			
+			public function set label(value:String):void
+			{
+				this.testo.text = value
+				var myGlow:GlowFilter = new GlowFilter();
+				myGlow.blurX = 2
+				myGlow.blurY = 2
+				//myGlow.color = 0xFFFFFF
+				this.testo.filters = [myGlow]
+			}
+			
+			public function get label():String
+			{
+				return this.testo.text;
+				
+			}
+			
+			protected function initComponet(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.useHandCursor = true
+				this.buttonMode = true
+				//this.horizontalAlign="center"
+				source = 'file://'+File.applicationDirectory.nativePath+'/assets/btn.png'
+				this.addEventListener(MouseEvent.MOUSE_OVER, rollOverEvent)
+				this.addEventListener(MouseEvent.MOUSE_OUT, rollOutEvent)
+				
+			}
+			
+			private function rollOverEvent(eve:MouseEvent):void
+			{
+				
+				//var myBlur:BlurFilter = new BlurFilter();
+				var myGlow:GlowFilter = new GlowFilter();
+				myGlow.color = 0xFFFFFF
+				
+				this.filters = [myGlow];
+				img.filters = [];
+			}
+			
+			private function rollOutEvent(eve:MouseEvent):void
+			{
+				
+				myBlur.blurX = 2
+				myBlur.blurY = 2
+				myBlur.quality = BitmapFilterQuality.HIGH
+				img.filters = [myBlur];
+				this.filters = [];
+			}
+			
+			
+			public function set source(value:String):void
+			{
+				
+				img.source = value
+				myBlur.blurX = 2
+				myBlur.blurY = 2
+				myBlur.quality = BitmapFilterQuality.HIGH
+				img.filters = [myBlur];
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BitmapImage id="img" width="100%" height="100%" smooth="true" smoothingQuality="high"/>
+	<s:Label id="testo" left="0" right="0" verticalCenter="0" color="#ffffff" fontFamily="BaseFont"
+			 fontSize="24" textAlign="center"/>
+</s:Group>
