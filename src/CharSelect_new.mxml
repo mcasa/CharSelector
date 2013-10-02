@@ -39,6 +39,8 @@
 				var screenBounds:Rectangle = Screen.mainScreen.visibleBounds;
 				var w:int = width;
 				var h:int = height;
+				var pippo:String;
+				var plut:String;
 				
 				var x:int = screenBounds.x + ((screenBounds.width-w)/2);
 				var y:int = screenBounds.y + ((screenBounds.height-h)/2);
