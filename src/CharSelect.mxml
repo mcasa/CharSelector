@@ -422,8 +422,6 @@
 				<s:Sequence id="t2" targets="{[splashScreen,titleSkyrim]}"> 
 					<s:SetAction target="{splashScreen}" property="includeInLayout"/>
 					<s:SetAction target="{titleSkyrim}" property="includeInLayout"/> 
-					
-					
 					<s:Fade duration="500"/> 
 				</s:Sequence> 
 			</s:Transition> 
