@@ -31,6 +31,9 @@
     <application path="CharSelect.mxml">
       <airExcludes/>
     </application>
+    <application path="CharSelectorGhost.mxml">
+      <airExcludes/>
+    </application>
   </applications>
   <modules/>
   <buildCSSFiles/>

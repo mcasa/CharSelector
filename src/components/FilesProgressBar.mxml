@@ -30,16 +30,15 @@
 			
 			public function startProcessForBackUp(from:String, to:String):void
 			{
-				var sourceDir:File = File.documentsDirectory
-				sourceDir = sourceDir.resolvePath(from); 
+				var sourceDir:File = new File(from);
+				
 				var files:Array = sourceDir.getDirectoryListing()
 				copyFrom = from
 				copyTo = to
 				pBar.visible = true
 				pBar.label = "Create backup directory"
 				
-				var bkpDir:File = File.documentsDirectory
-				bkpDir = bkpDir.resolvePath(to);
+				var bkpDir:File = new File(to)
 				if(!bkpDir.exists)
 					bkpDir.createDirectory()
 				fileDone = 0;		
@@ -56,8 +55,7 @@
 			public function startForCopy(from:String, to:String):void
 			{
 				
-				var sourceDir:File = File.documentsDirectory
-				sourceDir = sourceDir.resolvePath(from); 
+				var sourceDir:File = new File(from) 
 				var files:Array = sourceDir.getDirectoryListing()
 				copyFrom = from
 				copyTo = to
@@ -78,8 +76,8 @@
 				{
 					if(fileDone<_files.length)
 					{
-						var whereToCopy = File.documentsDirectory;
-						whereToCopy = whereToCopy.resolvePath(copyTo+"/"+_files[fileDone].name);
+						var whereToCopy = new File(copyTo)
+						whereToCopy = whereToCopy.resolvePath(_files[fileDone].name);
 						copyThisFile(_files[fileDone],whereToCopy)
 						
 					}else
@@ -125,8 +123,7 @@
 			
 			public function startProcessForChar(from:String):void
 			{
-				var sourceDir:File = File.documentsDirectory
-				sourceDir = sourceDir.resolvePath(from); 
+				var sourceDir:File = new File(from) 
 				var files:Array = sourceDir.getDirectoryListing()
 				
 				pBar.visible = true
@@ -207,8 +204,7 @@
 			public function startProcessDeleteFrom(from:String):void
 			{
 				deleteFrom = from
-				var sourceDir:File = File.documentsDirectory
-				sourceDir = sourceDir.resolvePath(deleteFrom); 
+				var sourceDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH+"/Saves"))
 				var files:Array = sourceDir.getDirectoryListing()
 				
 				pBar.visible = true

@@ -6,12 +6,14 @@
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
 			
 			import spark.filters.BlurFilter;
 			import spark.filters.DropShadowFilter;
 			
 			private var db:ArrayCollection;
 			private var firstTime:Boolean = true;
+			
 			
 			public function checkingFile():void
 			{
@@ -23,13 +25,20 @@
 					readFileIni(f)
 			}
 			
-			private function writeFileIni(ini:File):void
+			public function setClose(value:Boolean):void
+			{
+				
+				this.visible=value
+				this.save.enabled = !value
+			}
+			
+			public function writeFileIni(ini:File):void
 			{
 				var str:String="";
 				var stream:FileStream = new FileStream();
 				for( var i:Number = 0; i<ConfigProperties.length; i++)
 				{
-					str = ConfigProperties.getTypeAt(i)+"="+ConfigProperties.getPropertyAt(i)+";\n"
+					str = ConfigProperties.getTypeAt(i)+"="+ConfigProperties.getPropertyAt(i)+"\n"
 					stream.open(ini, FileMode.APPEND);
 					stream.writeUTFBytes(str);
 				}
@@ -65,9 +74,10 @@
 						 arr.push({type:"ENB DLL", value:"false"})
 				db = new ArrayCollection(arr)
 				lista.dataProvider = db
+			dispatchEvent(new Event(Event.COMPLETE))
 			}
 			
-			private function readFileIni(ini:File):void
+			public function readFileIni(ini:File):void
 			{
 				
 				var url:URLRequest = new URLRequest(ini.url);
@@ -87,12 +97,17 @@
 				// of URLLoader.
 				var pars:PropertiesParser = new PropertiesParser()
 				var prop:Properties =  pars.parseProperties(e.currentTarget.data)
-				trace(prop.getProperty("skyPath").slice(0,prop.getProperty("skyPath").length-2))
-				this.skyPath.text = prop.getProperty("skyPath").slice(0,prop.getProperty("skyPath").length-1);
-				this.savePath.text = prop.getProperty("savePath").slice(0,prop.getProperty("savePath").length-1);
+				for( var i:Number = 0; i<ConfigProperties.length; i++)
+				{
+					ConfigProperties.setProperty(ConfigProperties.getTypeAt(i), prop.getProperty(ConfigProperties.getTypeAt(i)))
+					
+				}
+				trace(prop.getProperty("skyPath").slice(0,prop.getProperty("skyPath").length))
+				this.skyPath.text = prop.getProperty(ConfigProperties.SKYPATH).slice(0,prop.getProperty(ConfigProperties.SKYPATH).length);
+				this.savePath.text = prop.getProperty(ConfigProperties.SAVEPATH).slice(0,prop.getProperty(ConfigProperties.SAVEPATH).length);
 				
-				this.closeApp.selected = normalizeProperty(prop.getProperty("closeApp").slice(0,prop.getProperty("closeApp").length-1))
-				this.zipFiles.selected = normalizeProperty(prop.getProperty("zipFiles").slice(0,prop.getProperty("zipFiles").length-1))
+				this.closeApp.selected = normalizeProperty(prop.getProperty(ConfigProperties.CLOSEAPP).slice(0,prop.getProperty(ConfigProperties.CLOSEAPP).length))
+				this.zipFiles.selected = normalizeProperty(prop.getProperty(ConfigProperties.ZIPFILES).slice(0,prop.getProperty(ConfigProperties.ZIPFILES).length))
 				
 				
 				popolate()
@@ -116,9 +131,9 @@
 			protected function save_clickHandler(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
-				var f:File = File.desktopDirectory
-				f = f.resolvePath("char.ini")
+				var f:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/CharSelect.ini")
 				checkingFile()
+				event.currentTarget.enabled = false
 			}
 			protected function bgImg_completeHandler(event:Event):void
 			{
@@ -131,6 +146,30 @@
 				//myGlow.color = 0xFFFFFF
 				this.bgImg.filters = [myShadow]
 			}
+			
+			protected function closeOpt(eve:MouseEvent):void
+			{
+				
+				this.visible = false
+				dispatchEvent(new Event(FlexEvent.REMOVE))
+			}
+			
+			protected function pathBtn_clickHandler(event:MouseEvent):void
+			{
+								
+					var _loadFile:File = new File();
+					_loadFile.addEventListener(Event.SELECT, selectFile);
+					_loadFile.browseForDirectory("Select Skyrim application folder");
+			}
+			protected function selectFile(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+				skyPath.text = event.target.nativePath
+				ConfigProperties.setProperty("skyPath", event.target.nativePath)
+				
+			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -149,17 +188,17 @@
 			<s:TextArea id="skyPath" width="100%" height="20" borderVisible="false" color="#FDF9F9"
 						contentBackgroundColor="#726B6B" verticalAlign="middle"
 						fontWeight="bold"
-						textAlign="right"/>
+						textAlign="left"/>
 			<s:Button id="pathBtn" label="Select"
-					  click="" fontFamily="BaseFont" fontSize="9" />
+					  click="pathBtn_clickHandler(event)" fontFamily="BaseFont" fontSize="9" />
 		</s:HGroup>
 		<s:TextArea width="80%" height="20" borderVisible="false" color="#FDF9F9" editable="false" selectable="false" contentBackgroundAlpha="0" fontFamily="BaseFont" text="Select save folder" />
 		<s:HGroup width="80%">
 			<s:TextArea id="savePath" width="100%" height="20" borderVisible="false" color="#FDF9F9"
 						contentBackgroundColor="#726B6B" verticalAlign="middle"
 						fontWeight="bold"
-						textAlign="right"/>
-			<s:Button id="saveBtn" label="Select"
+						textAlign="left"/>
+			<s:Button id="saveBtn" label="Select" visible="false" width="0"
 					  click="" fontFamily="BaseFont" fontSize="9" />
 		</s:HGroup>
 		<s:HGroup width="80%" enabled="false">
@@ -173,12 +212,12 @@
 			<s:CheckBox id="closeApp"/>
 		</s:HGroup>
 		<s:TextArea width="80%" height="20" borderVisible="false" color="#FDF9F9" editable="false" contentBackgroundAlpha="0" selectable="false"
-					contentBackgroundColor="#726B6B" fontFamily="BaseFont" text="Installed libs"/>
+					contentBackgroundColor="#726B6B" fontFamily="BaseFont" text="Installed:"/>
 		<s:DataGrid id="lista" width="80%" height="100%" borderVisible="false" color="#ffffff"
 					enabled="false"/>
 		<s:HGroup bottom="20" width="80%" horizontalAlign="right" paddingBottom="10">
 			<s:Button id="cancell" label="Close"
-					  click="" fontFamily="BaseFont" fontSize="12" />
+					  click="closeOpt(event)" fontFamily="BaseFont" fontSize="12" />
 			<s:Button id="save" label="Save"
 					  click="save_clickHandler(event)" fontFamily="BaseFont" fontSize="12" />
 		</s:HGroup>

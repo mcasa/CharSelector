@@ -4,8 +4,15 @@ package components
 
 	public class ConfigProperties
 	{
+		public static const SKYPATH:String = "skyPath";
+		public static const SAVEPATH:String = "savePath";
+		public static const CHARNAME:String = "charName";
+		public static const CLOSEAPP:String = "closeApp";
+		public static const SPLASHTIME:String = "splashTime";
+		public static const ZIPFILES:String = "zipFiles";
+		
 		public static var type:Array = ["skyPath", "savePath", "charName", "closeApp", "splashTime", "zipFiles"]
-		public static var value:Array = ["G:/Bethesda/The Elder Scrolls V - Skyrim", File.documentsDirectory.nativePath+"/My Games/Skyrim", "", true, 2, false]
+		public static var value:Array = ["", File.documentsDirectory.nativePath+"/My Games/Skyrim", "", true, 2, false]
 		/*private static var _skyPath:String = "";
 		private static var _savePath:String = File.documentsDirectory.nativePath+"/My Games/Skyrim";
 		private static var _charName:String= "";
