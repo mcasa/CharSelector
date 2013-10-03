@@ -204,7 +204,7 @@
 			public function startProcessDeleteFrom(from:String):void
 			{
 				deleteFrom = from
-				var sourceDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH+"/Saves"))
+				var sourceDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves")
 				var files:Array = sourceDir.getDirectoryListing()
 				
 				pBar.visible = true

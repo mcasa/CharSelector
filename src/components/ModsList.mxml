@@ -18,8 +18,9 @@
 					var arrEsm:Array = new Array()
 					for (var i:Number = 0; i< arr.length; i++)
 					{
-						if(arr[i].extension == "esm")
-							arrEsm.push({File:StringUtils.titleize(removeExt(arr[i].name))})
+						if(arr[i].extension == "esm" || arr[i].extension == "esp")
+							if(arrEsm.indexOf(removeExt(arr[i].name))== -1)
+								arrEsm.push({File:removeExt(arr[i].name)})
 					}
 					
 					var arrColl:ArrayCollection = new ArrayCollection(arrEsm)
@@ -63,6 +64,6 @@
 			  horizontalAlign="left">
 		<s:TextArea width="90%" height="20" borderVisible="false" color="#FDF9F9" editable="false" contentBackgroundAlpha="0" selectable="false"
 					 fontFamily="BaseFont" text="Installed Mods:"/>
-		<s:DataGrid id="dataGrid" width="75%" borderVisible="false" color="#ffffff" enabled="false" height="100%" editable="false" verticalScrollPolicy="auto" />
+		<s:DataGrid id="dataGrid" width="75%" borderVisible="false" fontSize="10" color="#ffffff" enabled="true" horizontalScrollPolicy="off" height="100%" editable="false" verticalScrollPolicy="auto" />
 	</s:VGroup>	
 </s:Group>

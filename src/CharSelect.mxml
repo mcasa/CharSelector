@@ -13,9 +13,20 @@
 			embed-as-cff : true;
 			fontWeight: normal;
 		}
+		@font-face{
+			src:url("font/MorrisRomanBlack.ttf");
+			fontFamily: "MorrisRomanBlack";
+			embed-as-cff : true;
+			fontWeight: normal;
+		}
+		
 	</fx:Style>
 	<fx:Script>
 		<![CDATA[
+			import components.ConfigProperties;
+			
+			import mx.events.FlexEvent;
+			
 			import org.osmf.events.TimeEvent;
 			[SWF(frameRate="60")]
 			
@@ -56,7 +67,7 @@
 				stage.nativeWindow.y = y;
 				visible = true;
 				timer.addEventListener(TimerEvent.TIMER_COMPLETE, changeState)
-					timer.start()
+				timer.start()
 				
 			}
 			
@@ -68,7 +79,7 @@
 			
 			public function startApp():void{
 				
-				var ini:File = File.documentsDirectory.resolvePath("My Games/Skyrim/CharSelect.ini");
+				var ini:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/CharSelect.ini");
 				if(ini.exists)
 				{
 					
@@ -84,30 +95,38 @@
 				// TODO Auto-generated method stub
 				
 				skyPath.text = event.target.nativePath
-				var ini:File = File.documentsDirectory.resolvePath("My Games/Skyrim/CharSelect.ini");
-				var stream:FileStream = new FileStream();
+				ConfigProperties.setProperty("skyPath", event.target.nativePath)
+				
+				var ini:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/CharSelect.ini");
+				optWindow.writeFileIni(ini)
+				readAndSetI()
+				/* var stream:FileStream = new FileStream();
 				stream.open(ini, FileMode.WRITE);
 				stream.writeUTFBytes(event.target.nativePath);
-				stream.close();
+				stream.close(); */
 				//bkpfiles()
 				
 				
 				
-				readAndSetI()
+				
 				
 			}
 			
 			private function loadFileIni():void
 			{
-				var ini:File = File.documentsDirectory.resolvePath("My Games/Skyrim/CharSelect.ini");
-				var url:URLRequest = new URLRequest(ini.url);
+				var ini:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/CharSelect.ini");
+				optWindow.addEventListener(Event.COMPLETE, loaderComplete);
+				optWindow.readFileIni(ini)
+				
+				//this.skyPath.text = e.currentTarget.data
+				/* var url:URLRequest = new URLRequest(ini.url);
 				
 				// Define the URLLoader.
 				var loader:URLLoader = new URLLoader();
 				loader.load(url);
 				pathBtn.visible = false
 				// Listen for when the file has finished loading.
-				loader.addEventListener(Event.COMPLETE, loaderComplete);
+				loader.addEventListener(Event.COMPLETE, loaderComplete); */
 				
 			}
 			
@@ -115,14 +134,14 @@
 			{
 				// The output of the text file is available via the data property
 				// of URLLoader.
-				trace(e.currentTarget.data);
-				this.skyPath.text = e.currentTarget.data
 				
+				modWindow.popolate()
+				addEventListener(FlexEvent.REMOVE, closeModList)
 				/*this.skyPath.width = this.skyPath.widthInChars */
 				/******************		readAndSet() ****************************/
 				readAndSetI()
 			}
-		
+			
 			private var _loadFile:File;
 			
 			protected function closeEvent(event:MouseEvent):void
@@ -139,15 +158,15 @@
 			private function readAndSetI():void
 			{
 				
-				var bat:File = new File(this.skyPath.text) 
+				var bat:File = new File(ConfigProperties.getProperty(ConfigProperties.SKYPATH)) 
 				bat = bat.resolvePath("starter.bat");
 				if(!bat.exists)
 				{
-				var stream:FileStream = new FileStream();
-				stream.open(bat, FileMode.WRITE);
-				stream.writeUTFBytes("START skse_loader.exe");
-				stream.close();
-				
+					var stream:FileStream = new FileStream();
+					stream.open(bat, FileMode.WRITE);
+					stream.writeUTFBytes("START skse_loader.exe");
+					stream.close();
+					
 				}
 				
 				
@@ -162,15 +181,14 @@
 			
 			private function readAndSetII(eve:TimerEvent):void
 			{
-				var sourceDir:File = File.documentsDirectory
-				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Saves");
+				var sourceDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves");
 				var files:Array;
 				if(!sourceDir.exists)
 					infoloading.text = "you don't have any charcters... close"
 				else
 				{
 					progressAction.addEventListener("COPY_COMPLETE", bkpComplete)
-					progressAction.startProcessForBackUp("My Games/Skyrim/Saves", "My Games/Skyrim/BKP")
+					progressAction.startProcessForBackUp(sourceDir.nativePath, ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/BKP");
 				}
 				
 			}
@@ -178,8 +196,7 @@
 			protected function bkpComplete(eve:Event):void
 			{
 				progressAction.removeEventListener("COPY_COMPLETE", bkpComplete)
-				var fromDirectory:File = File.documentsDirectory;
-				fromDirectory = fromDirectory.resolvePath("My Games/Skyrim/BKP")
+				var fromDirectory:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/BKP")
 				var files:Array = fromDirectory.getDirectoryListing()
 				var charName:Array = new Array()
 				for (var i:uint = 0; i < files.length; i++)
@@ -195,15 +212,15 @@
 				
 				for(var i:uint = 0; i<charName.length; i++)
 				{
-					var directory:File = File.documentsDirectory;
-					directory = directory.resolvePath("My Games/Skyrim/Chars/"+charName[i]);
+					var directory:File =new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Chars")
+					directory = directory.resolvePath(charName[i]);
 					if(!directory.exists)
 						directory.createDirectory()
 					
 				}
 				
 				progressAction.addEventListener("COPY_COMPLETE", bkpCompleteForChar)
-				progressAction.startProcessForChar("My Games/Skyrim/Saves");
+				progressAction.startProcessForChar(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves")
 			}
 			protected function bkpCompleteForChar(eve:Event):void
 			{
@@ -216,8 +233,7 @@
 				//pathTool.visible = true;
 				progressAction.visible = false
 				currentState="use"
-				var sourceDir:File = File.documentsDirectory
-				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Chars")
+				var sourceDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Chars")
 				var files:Array = sourceDir.getDirectoryListing()
 				
 				for(var i:uint = 0; i<files.length; i++)
@@ -233,8 +249,7 @@
 						this.chars.addChar(tmpBtn)
 					}
 				}
-				sourceDir = File.documentsDirectory
-				sourceDir = sourceDir.resolvePath("My Games/Skyrim/Saves")
+				sourceDir = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves")
 				files = sourceDir.getDirectoryListing()
 				for(var i:uint = 0; i<files.length; i++)
 				{
@@ -254,7 +269,7 @@
 				progressAction.visible = true
 				selectedChar = eve.currentTarget.label
 				progressAction.addEventListener("COPY_COMPLETE", completeDelete)
-				progressAction.startProcessDeleteFrom("My Games/Skyrim/Saves")
+				progressAction.startProcessDeleteFrom(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves")
 				
 			}
 			
@@ -262,7 +277,7 @@
 			{
 				progressAction.removeEventListener("COPY_COMPLETE", completeDelete)
 				progressAction.addEventListener("COPY_COMPLETE", completeCopy)
-				progressAction.startForCopy("My Games/Skyrim/Chars/"+selectedChar, "My Games/Skyrim/Saves")
+				progressAction.startForCopy(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Chars/"+selectedChar, ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves")
 				
 			}
 			private function completeCopy(eve:Event):void
@@ -277,11 +292,11 @@
 			{
 				var i:Number;
 				i = str.indexOf("-")
-					//trace('i ' + i)
+				//trace('i ' + i)
 				var tmpStr:String = str.substr(i+2,str.length-1)
 				//trace('tmpStr ' + tmpStr)
 				i = tmpStr.indexOf(" ")
-			//	trace('i ' + i)
+				//	trace('i ' + i)
 				return tmpStr.substr(0, i)
 				
 			}
@@ -291,7 +306,7 @@
 			protected function chooseSkyrimPath(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
-//				pBar.visible = true
+				//				pBar.visible = true
 				_loadFile = new File();
 				_loadFile.addEventListener(Event.SELECT, selectFile);
 				_loadFile.browseForDirectory("Select Skyrim application folder");
@@ -301,17 +316,15 @@
 			
 			protected function button1_clickHandler(event:MouseEvent):void
 			{
-
+				
 				// TODO Auto-generated method stub
-				var myApp:File = new File(skyPath.text)
-				myApp = myApp.resolvePath("starter.bat");
-				trace("TODO Cambiare l'esecuzione")
+			
 				start();
-			/* 	var myAppProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+				/* 	var myAppProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				var myAppProcess = new NativeProcess();
 				myAppProcessStartupInfo.executable = myApp;
 				trace(myAppProcessStartupInfo.executable.nativePath)
-			myAppProcess.start(myAppProcessStartupInfo); */
+				myAppProcess.start(myAppProcessStartupInfo); */
 				
 				
 			}
@@ -322,13 +335,13 @@
 			private var batFile:File;
 			private var cmdFile:File;
 			
-
+			
 			public function start():void
 			{
 				
-					batFile = new File(skyPath.text)
-					batFile = batFile.resolvePath("starter.bat");
-					cmdFile = new File("c:\\Windows\\System32\\cmd.exe");
+				batFile = new File(ConfigProperties.getProperty(ConfigProperties.SKYPATH))
+				batFile = batFile.resolvePath("starter.bat");
+				cmdFile = new File("c:\\Windows\\System32\\cmd.exe");
 				
 				proceedToPackaging();
 			}
@@ -341,7 +354,7 @@
 				processArgs.push("/c");
 				processArgs.push(batFile.nativePath);
 				
-				var workingDirectory:File =new File(skyPath.text)
+				var workingDirectory:File =new File(ConfigProperties.getProperty(ConfigProperties.SKYPATH))
 				var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				
 				nativeProcessStartupInfo.arguments = processArgs;
@@ -371,7 +384,7 @@
 			{
 				var status:String = nativeProcess.standardOutput.readUTFBytes(nativeProcess.standardOutput.bytesAvailable);
 				
-			//	Alert.show(status)
+				//	Alert.show(status)
 			}
 			
 			protected function resizeImg(event:Event):void
@@ -401,8 +414,13 @@
 			protected function optionWindow(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
-				optWindow.visible = !optWindow.visible
-				optWindow.checkingFile();
+				optWindow.setVisible(!optWindow.visible)
+				modWindow.visible= !modWindow.visible
+			}
+			
+			protected function closeModList(event:FlexEvent):void
+			{
+				modWindow.visible = !modWindow.visible
 			}
 			
 		]]>
@@ -415,18 +433,18 @@
 	
 	
 	
-		<s:transitions>
+	<s:transitions>
 		<s:Transition id="fade" toState="splash" fromState="*">
-				<s:Fade />
+			<s:Fade />
 		</s:Transition>
-			<s:Transition id="toAnyFromAny" fromState="*" toState="*"> 
-				<s:Sequence id="t2" targets="{[splashScreen,titleSkyrim]}"> 
-					<s:SetAction target="{splashScreen}" property="includeInLayout"/>
-					<s:SetAction target="{titleSkyrim}" property="includeInLayout"/> 
-					<s:Fade duration="500"/> 
-				</s:Sequence> 
-			</s:Transition> 
-			</s:transitions>
+		<s:Transition id="toAnyFromAny" fromState="*" toState="*"> 
+			<s:Sequence id="t2" targets="{[splashScreen,titleSkyrim]}"> 
+				<s:SetAction target="{splashScreen}" property="includeInLayout"/>
+				<s:SetAction target="{titleSkyrim}" property="includeInLayout"/> 
+				<s:Fade duration="500"/> 
+			</s:Sequence> 
+		</s:Transition> 
+	</s:transitions>
 	
 	<s:BitmapImage id="bgImg"  fillMode="scale" verticalCenter="0" horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
 				   complete="resizeImg(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}" includeInLayout="false" includeInLayout.splash="true"/>
@@ -434,26 +452,25 @@
 	<s:BitmapImage id="splashScreen"  fillMode="scale"  includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
 				   complete="bgImg_completeHandler(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}"/>
 	<s:VGroup verticalCenter="0" horizontalCenter="0" horizontalAlign="center" id="titleSkyrim"
-			 width="100%">
-	<s:Label id="skyrimTitle" fontSize="65" text="skyrim" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
-			 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0"/>
+			  width="100%">
+		<s:Label id="skyrimTitle" fontSize="65" text="skyrim" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
+				 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0"/>
 		<s:Line id="linea" xFrom="{skyrimTitle.x}" xTo="{skyrimTitle.width}" yFrom="0" yTo="0" includeIn="splash" includeInLayout="false" includeInLayout.splash="true">
 			<!-- Define the border color of the line. -->
 			<s:stroke>
 				<s:SolidColorStroke color="0xffffff" weight="3" caps="round"/>
 			</s:stroke>
 		</s:Line>
-	<s:Label id="skyrimSubTitle" fontSize="24" text="select character tool" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
-			 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0" />
+		<s:Label id="skyrimSubTitle" fontSize="42" text="select character tool" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
+				 color="#FDFCFC" fontFamily="MorrisRomanBlack" verticalAlign="middle" verticalCenter="0" />
 		
 	</s:VGroup>
-	
-	<s:TextArea includeIn="use" height="20" borderVisible="false" color="#FDF9F9" width="100%" top="150"
-				contentBackgroundAlpha="0.0" contentBackgroundColor="#726B6B" editable="false" selectable="false"
+	<s:TextArea includeIn="use" borderVisible="false" color="#FDF9F9" width="100%" top="0"
+				contentBackgroundAlpha="0.0" contentBackgroundColor="#726B6B" editable="false" selectable="false" fontSize="24"
 				text="select Character:" textAlign="center" verticalAlign="middle" fontFamily="BaseFont" />
 	<s:VGroup left="0"
-			   right="0" top="180" horizontalAlign="center">
-		<components:CharSlider id="chars" includeIn="use" width="{width}" />
+			  right="0" top="180" horizontalAlign="center">
+		<components:CharSlider id="chars" includeIn="use" width="{980}" />
 	</s:VGroup>
 	<s:HGroup bottom="10" horizontalCenter="0" id="pathTool"
 			  verticalAlign.use="contentJustify" visible.splash="false">
@@ -465,15 +482,16 @@
 				  click="chooseSkyrimPath(event)"/>
 	</s:HGroup>
 	<s:Label id="labelText" fontSize="16" textAlign="center" visible="true" includeIn="use"
-			color="#FDFCFC" fontFamily="BaseFont" bottom="140"
-			horizontalCenter="0" 
+			 color="#FDFCFC" fontFamily="BaseFont" bottom="140"
+			 horizontalCenter="0" 
 			 verticalAlign="middle"/>
-	<components:StartButton includeIn="use" bottom="30" width="100" height="100" label="start" id="startSkyrim"
+	<components:StartButton includeIn="use" bottom="30" width="100" height="100" label="start" id="startSkyrim" 
 							click="button1_clickHandler(event)"
 							horizontalCenter="0"/>
 	<s:Label id="infoloading" fontSize="24" textAlign="center" color="#ffffff" fontFamily="BaseFont" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
 	<components:FilesProgressBar id="progressAction" width="100%" bottom="0"/>
-	<components:ConfigView id="optWindow" verticalCenter="0" right="0" width="250" visible="false"/>
+	<components:ConfigView id="optWindow" verticalCenter="0" right="0" width="250" visible="false" />
+	<components:ModsList id="modWindow" visible="false" width="250" verticalCenter="0" left="0" />
 	<s:HGroup width="100%" horizontalAlign="right" top="5" right="5">
 		<components:BtnSimple width="20" height="20" toolTip="Settings" click="optionWindow(event)" useHandCursor="true"/>
 		<s:TextArea toolTip="Minimize" id="minimizeBtn" width="20" click="minimizeEvent(event)" text="_"
