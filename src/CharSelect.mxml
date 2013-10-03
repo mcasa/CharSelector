@@ -402,6 +402,7 @@
 			{
 				// TODO Auto-generated method stub
 				optWindow.visible = !optWindow.visible
+				optWindow.checkingFile();
 			}
 			
 		]]>
@@ -472,7 +473,7 @@
 							horizontalCenter="0"/>
 	<s:Label id="infoloading" fontSize="24" textAlign="center" color="#ffffff" fontFamily="BaseFont" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
 	<components:FilesProgressBar id="progressAction" width="100%" bottom="0"/>
-	<components:OptionWindow id="optWindow" verticalCenter="0" right="0" width="250" visible="false"/>
+	<components:ConfigView id="optWindow" verticalCenter="0" right="0" width="250" visible="false"/>
 	<s:HGroup width="100%" horizontalAlign="right" top="5" right="5">
 		<components:BtnSimple width="20" height="20" toolTip="Settings" click="optionWindow(event)" useHandCursor="true"/>
 		<s:TextArea toolTip="Minimize" id="minimizeBtn" width="20" click="minimizeEvent(event)" text="_"

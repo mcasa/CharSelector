@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="400" height="600" >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			import spark.filters.BlurFilter;
+			import spark.filters.DropShadowFilter;
+			
+			private var db:ArrayCollection;
+			private var firstTime:Boolean = true;
+			
+			public function checkingFile():void
+			{
+				var f:File = File.desktopDirectory
+				f = f.resolvePath("char.ini")
+				if(!f.exists)
+					writeFileIni(f)
+				else
+					readFileIni(f)
+			}
+			
+			private function writeFileIni(ini:File):void
+			{
+				var str:String="";
+				var stream:FileStream = new FileStream();
+				for( var i:Number = 0; i<ConfigProperties.length; i++)
+				{
+					str = ConfigProperties.getTypeAt(i)+"="+ConfigProperties.getPropertyAt(i)+";\n"
+					stream.open(ini, FileMode.APPEND);
+					stream.writeUTFBytes(str);
+				}
+				
+				
+				stream.close();
+				readFileIni(ini)
+			}
+			
+			private function popolate():void
+			{
+				var arr:Array = new Array();
+				var opt:File = new File(this.skyPath.text+"/skse_loader.exe")
+					trace("---------" + opt.url)
+					if(opt.exists)
+						arr.push({type:"SKSE", value:"true"})
+					else
+						arr.push({type:"SKSE", value:"false"})
+					 opt = new File(this.skyPath.text+"/Data/Dawnguard.esm")
+					if(opt.exists)
+						 arr.push({type:"DLC Dawnguard", value:"true"})
+					 else
+						 arr.push({type:"DLC Dawnguard", value:"false"})
+					 opt = new File(this.skyPath.text+"/Data/HearthFires.esm")
+					 if(opt.exists)
+						 arr.push({type:"DLC HearthFires", value:"true"})
+					 else
+						 arr.push({type:"DLC HearthFires", value:"false"})
+					 opt = new File(this.skyPath.text+"/d3d9.dll")
+					 if(opt.exists)
+						 arr.push({type:"ENB DLL", value:"true"})
+					 else
+						 arr.push({type:"ENB DLL", value:"false"})
+				db = new ArrayCollection(arr)
+				lista.dataProvider = db
+			}
+			
+			private function readFileIni(ini:File):void
+			{
+				
+				var url:URLRequest = new URLRequest(ini.url);
+				
+				// Define the URLLoader.
+				var loader:URLLoader = new URLLoader();
+				loader.load(url);
+				
+				// Listen for when the file has finished loading.
+				loader.addEventListener(Event.COMPLETE, loaderComplete);
+				
+			}
+			
+			private function loaderComplete(e:Event):void
+			{
+				// The output of the text file is available via the data property
+				// of URLLoader.
+				var pars:PropertiesParser = new PropertiesParser()
+				var prop:Properties =  pars.parseProperties(e.currentTarget.data)
+				trace(prop.getProperty("skyPath").slice(0,prop.getProperty("skyPath").length-2))
+				this.skyPath.text = prop.getProperty("skyPath").slice(0,prop.getProperty("skyPath").length-1);
+				this.savePath.text = prop.getProperty("savePath").slice(0,prop.getProperty("savePath").length-1);
+				
+				this.closeApp.selected = normalizeProperty(prop.getProperty("closeApp").slice(0,prop.getProperty("closeApp").length-1))
+				this.zipFiles.selected = normalizeProperty(prop.getProperty("zipFiles").slice(0,prop.getProperty("zipFiles").length-1))
+				
+				
+				popolate()
+				
+			}
+			
+			private function normalizeProperty(property:String):*
+			{
+				
+				if(property == 'true' || property=="false")
+						{
+							if(property == "true")
+								return true
+							else return false;
+						}
+					else 
+						return Number(property)
+				
+			}
+			
+			protected function save_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var f:File = File.desktopDirectory
+				f = f.resolvePath("char.ini")
+				checkingFile()
+			}
+			protected function bgImg_completeHandler(event:Event):void
+			{
+				
+				var myShadow:spark.filters.DropShadowFilter = new DropShadowFilter();
+				myShadow.angle =90
+				var myGlow:spark.filters.BlurFilter = new BlurFilter();
+				myGlow.blurX = 2
+				myGlow.blurY = 2
+				//myGlow.color = 0xFFFFFF
+				this.bgImg.filters = [myShadow]
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BitmapImage id="bgImg"  fillMode="scale" height="90%" verticalCenter="0" x="0" y="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/optSfondo.png'}" complete="bgImg_completeHandler(event)"
+				   ioError="{trace(File.applicationDirectory.nativePath+'/assets/optSfondo.jpg')}" />
+	<s:VGroup contentBackgroundColor="#433629"
+			  horizontalAlign="center" height="90%" width="270" top="30">
+		
+		
+		<s:Label width="90%" fontFamily="BaseFont" fontSize="34" paddingTop="10" text="Option" color="#ffffff"
+				 textAlign="left"/>
+		<s:TextArea width="80%" height="20" borderVisible="false" editable="false" contentBackgroundAlpha="0" color="#FDF9F9" selectable="false" fontFamily="BaseFont" text="Select game folder"/>
+		<s:HGroup width="80%">
+			<s:TextArea id="skyPath" width="100%" height="20" borderVisible="false" color="#FDF9F9"
+						contentBackgroundColor="#726B6B" verticalAlign="middle"
+						fontWeight="bold"
+						textAlign="right"/>
+			<s:Button id="pathBtn" label="Select"
+					  click="" fontFamily="BaseFont" fontSize="9" />
+		</s:HGroup>
+		<s:TextArea width="80%" height="20" borderVisible="false" color="#FDF9F9" editable="false" selectable="false" contentBackgroundAlpha="0" fontFamily="BaseFont" text="Select save folder" />
+		<s:HGroup width="80%">
+			<s:TextArea id="savePath" width="100%" height="20" borderVisible="false" color="#FDF9F9"
+						contentBackgroundColor="#726B6B" verticalAlign="middle"
+						fontWeight="bold"
+						textAlign="right"/>
+			<s:Button id="saveBtn" label="Select"
+					  click="" fontFamily="BaseFont" fontSize="9" />
+		</s:HGroup>
+		<s:HGroup width="80%" enabled="false">
+			<s:TextArea width="100%" height="20" borderVisible="false" color="#FDF9F9" editable="false" selectable="false" 
+						text="Zip Back Up files"/>
+			<s:CheckBox id="zipFiles"/>
+		</s:HGroup>
+		<s:HGroup width="80%" enabled="false">
+			<s:TextArea width="100%" height="20" borderVisible="false" color="#FDF9F9" editable="false" selectable="false"
+						text="Close application when start Skyrim"/>
+			<s:CheckBox id="closeApp"/>
+		</s:HGroup>
+		<s:TextArea width="80%" height="20" borderVisible="false" color="#FDF9F9" editable="false" contentBackgroundAlpha="0" selectable="false"
+					contentBackgroundColor="#726B6B" fontFamily="BaseFont" text="Installed libs"/>
+		<s:DataGrid id="lista" width="80%" height="100%" borderVisible="false" color="#ffffff"
+					enabled="false"/>
+		<s:HGroup bottom="20" width="80%" horizontalAlign="right" paddingBottom="10">
+			<s:Button id="cancell" label="Close"
+					  click="" fontFamily="BaseFont" fontSize="12" />
+			<s:Button id="save" label="Save"
+					  click="save_clickHandler(event)" fontFamily="BaseFont" fontSize="12" />
+		</s:HGroup>
+	</s:VGroup>
+</s:Group>
