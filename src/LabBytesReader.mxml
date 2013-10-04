@@ -22,7 +22,7 @@
 			{ 
 				trace("start loaded")
 				var inFile:File = File.desktopDirectory; // source folder is desktop 
-				inFile = inFile.resolvePath("file.ess");  // name of file to read 
+				inFile = inFile.resolvePath("Salva.ess");  // name of file to read 
 				var inStream:FileStream = new FileStream();
 				
 				inStream.open(inFile, FileMode.READ); 
@@ -96,13 +96,21 @@
 				
 				// set the pixels of a bitmap from the loaded bitmapdata bytearray
 				bitmapData = new BitmapData(w, h, true);
-				bitmapData.setPixels(bitmapData.rect, bitmapBA);
+				bitmapBA.position = 0
+				bitmapData.setPixels(bitmapData.rect, bitmapBA.(w, h));
 				
 				bitmap = new Bitmap(bitmapData);
 				bi.width = w
 				bi.height = h
 				bi.source =  bitmap
 					
+			}
+			
+			function creatPixels(width:int,height:int):ByteArray
+			{
+				var result:ByteArray=new ByteArray();
+				result.length=(width*height)<<2;
+				return result;
 			}
 			
 			public function encode(ba:ByteArray):String {
