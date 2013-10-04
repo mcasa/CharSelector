@@ -83,7 +83,7 @@
 				trace('20',inBytes.position);
 				trace(inBytes.readByte())
 				trace('21',inBytes.position); */
-				l = 3*w*h
+				l = 4*w*h
 				var bitmapData:BitmapData;
 				var bitmapBA:ByteArray = new ByteArray();
 				var bitmap:Bitmap;
@@ -95,7 +95,7 @@
 				trace('21',inBytes.position);
 				
 				// set the pixels of a bitmap from the loaded bitmapdata bytearray
-				bitmapData = new BitmapData((w/3)*4, (h/3)*4, true);
+				bitmapData = new BitmapData(w, h, true);
 				bitmapData.setPixels(bitmapData.rect, bitmapBA);
 				
 				bitmap = new Bitmap(bitmapData);
