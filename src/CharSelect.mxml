@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   currentState="splash" showStatusBar="false" windowComplete="initapp()"
-					   backgroundColor="#726B6B" xmlns:components="components.*">
+					   backgroundColor="#726B6B" xmlns:components="components.*" >
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
 		@namespace mx "library://ns.adobe.com/flex/mx";
@@ -28,6 +28,8 @@
 			import mx.events.FlexEvent;
 			
 			import org.osmf.events.TimeEvent;
+			
+			import spark.components.windowClasses.TitleBar;
 			[SWF(frameRate="60")]
 			
 			import components.BtnChar;
@@ -52,8 +54,21 @@
 			private var selected:Boolean =false;
 			
 			private var selectedChar:String;
+			private var myShadow:spark.filters.DropShadowFilter = new DropShadowFilter();
 			
+			[Bindable]private var shadow:Array = [myShadow]
 			private var timer:Timer = new Timer(1000, 3);
+			
+			private var rectNativo:Rectangle;
+			
+			import mx.events.CloseEvent;
+			
+			
+			protected function OnDrag(event:MouseEvent):void
+			{
+				stage.nativeWindow.startMove();
+			}
+			
 			public function initapp():void{
 				
 				visible = false
@@ -68,6 +83,8 @@
 				visible = true;
 				timer.addEventListener(TimerEvent.TIMER_COMPLETE, changeState)
 				timer.start()
+				rectNativo = new Rectangle(x,y,width,height)
+				this.filters = shadow
 				
 			}
 			
@@ -243,10 +260,29 @@
 						var tmpBtn:BtnChar = new BtnChar()
 						tmpBtn.id = files[i].name+"Btn"
 						tmpBtn.label = files[i].name
-						tmpBtn.width = 256
+						tmpBtn.width = 200
 						tmpBtn.height = 256
 						tmpBtn.addEventListener(MouseEvent.CLICK, selectChar);
+						var firstFile:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Chars/"+files[i].name)
+						var firstFileArrTemp:Array = firstFile.getDirectoryListing()
+						
+						var firstFileArr:Array = new Array();
+						for(var z:uint = 0; z<firstFileArrTemp.length; z++)
+						{
+							if(firstFileArrTemp[z].extension == "ess")
+								firstFileArr.push(firstFileArrTemp[z])
+						}
+						
+						
+						firstFile = firstFileArr[0]
+						for(var z:uint = 0; z<firstFileArr.length; z++)
+						{
+							if(firstFile.creationDate<firstFileArr[z].creationDate)
+								firstFile = firstFileArr[z]
+						}
+						tmpBtn.setData(firstFile.nativePath)
 						this.chars.addChar(tmpBtn)
+						
 					}
 				}
 				sourceDir = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves")
@@ -423,6 +459,32 @@
 				modWindow.visible = !modWindow.visible
 			}
 			
+			protected function hgroup1_doubleClickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				trace("click")
+				/* stage.nativeWindow.width = Capabilities.screenResolutionX
+				stage.nativeWindow.height = Capabilities.screenResolutionY
+				stage.nativeWindow.x = 0
+				stage.nativeWindow.y = 0;
+				bar.removeEventListener(MouseEvent.DOUBLE_CLICK, hgroup1_doubleClickHandler)
+				bar.addEventListener(MouseEvent.DOUBLE_CLICK, hgroup2_doubleClickHandler)
+				bgImg.width = stage.nativeWindow.width
+				bgImg.height = stage.nativeWindow.height */
+			}
+			
+			protected function hgroup2_doubleClickHandler(event:MouseEvent):void
+			{
+				/* bar.removeEventListener(MouseEvent.DOUBLE_CLICK, hgroup2_doubleClickHandler)
+				stage.nativeWindow.width = rectNativo.width
+				stage.nativeWindow.height = rectNativo.height
+				stage.nativeWindow.x = rectNativo.x;
+				stage.nativeWindow.y = rectNativo.y;
+				bar.addEventListener(MouseEvent.DOUBLE_CLICK, hgroup1_doubleClickHandler)
+				bgImg.width = stage.nativeWindow.width
+				bgImg.height = stage.nativeWindow.height */
+			}
+			
 		]]>
 	</fx:Script>
 	<s:states>
@@ -446,31 +508,31 @@
 		</s:Transition> 
 	</s:transitions>
 	
-	<s:BitmapImage id="bgImg"  fillMode="scale" verticalCenter="0" horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
+	<s:BitmapImage id="bgImg" scaleMode="stretch" left="0" right="0" top="0" bottom="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
 				   complete="resizeImg(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}" includeInLayout="false" includeInLayout.splash="true"/>
 	
-	<s:BitmapImage id="splashScreen"  fillMode="scale"  includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
+	<s:BitmapImage id="splashScreen"  scaleMode="zoom" left="0" right="0" top="0" bottom="0" includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
 				   complete="bgImg_completeHandler(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}"/>
 	<s:VGroup verticalCenter="0" horizontalCenter="0" horizontalAlign="center" id="titleSkyrim"
 			  width="100%">
 		<s:Label id="skyrimTitle" fontSize="65" text="skyrim" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
-				 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0"/>
-		<s:Line id="linea" xFrom="{skyrimTitle.x}" xTo="{skyrimTitle.width}" yFrom="0" yTo="0" includeIn="splash" includeInLayout="false" includeInLayout.splash="true">
+				 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0" filters="{shadow}"/>
+		<s:Line id="linea" xFrom="{skyrimTitle.x}" xTo="{skyrimTitle.width}" yFrom="0" yTo="0" includeIn="splash" includeInLayout="false" includeInLayout.splash="true" filters="{shadow}">
 			<!-- Define the border color of the line. -->
 			<s:stroke>
 				<s:SolidColorStroke color="0xffffff" weight="3" caps="round"/>
 			</s:stroke>
 		</s:Line>
 		<s:Label id="skyrimSubTitle" fontSize="42" text="select character tool" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
-				 color="#FDFCFC" fontFamily="MorrisRomanBlack" verticalAlign="middle" verticalCenter="0" />
+				 color="#FDFCFC" fontFamily="MorrisRomanBlack" verticalAlign="middle" verticalCenter="0" filters="{shadow}"/>
 		
 	</s:VGroup>
 	<s:TextArea includeIn="use" borderVisible="false" color="#FDF9F9" width="100%" top="0"
 				contentBackgroundAlpha="0.0" contentBackgroundColor="#726B6B" editable="false" selectable="false" fontSize="24"
-				text="select Character:" textAlign="center" verticalAlign="middle" fontFamily="BaseFont" />
+				text="select Character:" textAlign="center" verticalAlign="middle" fontFamily="BaseFont" filters="{shadow}" />
 	<s:VGroup left="0"
-			  right="0" top="180" horizontalAlign="center">
-		<components:CharSlider id="chars" includeIn="use" width="{980}" />
+			  right="0" top="200" horizontalAlign="center">
+		<components:CharSlider id="chars" includeIn="use" width="980" />
 	</s:VGroup>
 	<s:HGroup bottom="10" horizontalCenter="0" id="pathTool"
 			  verticalAlign.use="contentJustify" visible.splash="false">
@@ -481,18 +543,18 @@
 		<s:Button id="pathBtn" label="Select Path" visible.use="false"
 				  click="chooseSkyrimPath(event)"/>
 	</s:HGroup>
-	<s:Label id="labelText" fontSize="16" textAlign="center" visible="true" includeIn="use"
+	<s:Label id="labelText" fontSize="16" textAlign="center" visible="true" includeIn="use" filters="{shadow}"
 			 color="#FDFCFC" fontFamily="BaseFont" bottom="140"
 			 horizontalCenter="0" 
 			 verticalAlign="middle"/>
 	<components:StartButton includeIn="use" bottom="30" width="100" height="100" label="start" id="startSkyrim" 
 							click="button1_clickHandler(event)"
-							horizontalCenter="0"/>
-	<s:Label id="infoloading" fontSize="24" textAlign="center" color="#ffffff" fontFamily="BaseFont" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
+							horizontalCenter="0" filters="{shadow}"/>
+	<s:Label id="infoloading" filters="{shadow}" fontSize="24" textAlign="center" color="#ffffff" fontFamily="BaseFont" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
 	<components:FilesProgressBar id="progressAction" width="100%" bottom="0"/>
 	<components:ConfigView id="optWindow" verticalCenter="0" right="0" width="250" visible="false" />
 	<components:ModsList id="modWindow" visible="false" width="250" verticalCenter="0" left="0" />
-	<s:HGroup width="100%" horizontalAlign="right" top="5" right="5">
+	<s:HGroup id="bar" width="100%" horizontalAlign="right" top="5" right="5" mouseDown="OnDrag(event)" doubleClick="hgroup1_doubleClickHandler(event)" doubleClickEnabled="true">
 		<components:BtnSimple width="20" height="20" toolTip="Settings" click="optionWindow(event)" useHandCursor="true"/>
 		<s:TextArea toolTip="Minimize" id="minimizeBtn" width="20" click="minimizeEvent(event)" text="_"
 					height="20" borderColor="#000000" color="#000000"
@@ -503,4 +565,5 @@
 					contentBackgroundColor="#726B6B" fontWeight="bold"
 					textAlign="center" verticalAlign="middle" selectable="false" useHandCursor="false" buttonMode="true" editable="false"/>
 	</s:HGroup>
+
 </s:WindowedApplication>

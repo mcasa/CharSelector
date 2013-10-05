@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
-					   xmlns:s="library://ns.adobe.com/flex/spark" 
-					   xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="readFileIntoByteArray(event)">
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" color="#ffffff">
 	<fx:Script>
 		<![CDATA[
 			import mx.events.FlexEvent;
@@ -13,21 +13,25 @@
 			
 			import org.springextensions.actionscript.ioc.config.impl.xml.namespacehandler.INamespaceHandler;
 			
+			import spark.filters.DropShadowFilter;
+			
 			private var inBytes:ByteArray = new ByteArray(); 
 			
 			[Bindable]private var nome:String;
-			[Bindable]private var lvl:String;
+			[Bindable]private var lvl:Number;
 			[Bindable]private var race:String;
 			[Bindable]private var location:String;
 			[Bindable]private var sex:String;
 			[Bindable]private var currentExp:Number;
 			[Bindable]private var nextLevExp:Number;
-			
-			private function readFileIntoByteArray(eve:FlexEvent):void 
+			private var myShadow:spark.filters.DropShadowFilter = new DropShadowFilter();
+			[Bindable]private var shadow:Array = [myShadow]
+				
+			public function readFileIntoByteArray(fileName:String):void 
 			{ 
-				trace("start loaded")
-				var inFile:File = File.desktopDirectory; // source folder is desktop 
-				inFile = inFile.resolvePath("Salva.ess");  // name of file to read 
+				trace("start loaded" + fileName)
+				var inFile:File = new File(fileName) // source folder is desktop 
+				//inFile = inFile.resolvePath("Salva.ess");  // name of file to read 
 				var inStream:FileStream = new FileStream();
 				
 				inStream.open(inFile, FileMode.READ); 
@@ -39,11 +43,13 @@
 			} 
 			protected function loaded2():void
 			{
+				try
+				{
 				var w:int;
 				var h:int;
 				var l:uint;
 				var tmpArr:ByteArray = new ByteArray()
-					var ni:int;
+				var ni:int;
 				inBytes.endian = Endian.LITTLE_ENDIAN
 				trace(inBytes.readUTFBytes(13))
 				trace('1',inBytes.position)
@@ -58,7 +64,7 @@
 				trace('5',inBytes.position)
 				nome = inBytes.readUTFBytes(ni)
 				trace('6',inBytes.position)
-				lvl = inBytes.readInt().toString();
+				lvl = inBytes.readInt();
 				trace('7',inBytes.position);
 				trace(ni = inBytes.readShort())
 				trace('8',inBytes.position);
@@ -89,7 +95,11 @@
 				trace(inBytes.readByte())
 				trace('21',inBytes.position); */
 				l = 3*w*h
-					
+				if(currentExp>nextLevExp)
+					currentExp=100
+				else
+				currentExp = (currentExp*100)/nextLevExp
+				
 				var bitmapData:BitmapData;
 				var bitmapBA:ByteArray = new ByteArray();
 				var bitmap:Bitmap;
@@ -122,29 +132,62 @@
 				
 				
 				var bit:Bitmap = new Bitmap(bitmapData)
-			
-					
-					bi.source = bit
-					bi.smoothingQuality = BitmapSmoothingQuality.HIGH
-					bi.smooth = true
-					
+				
+				
+				bi.source = bit
+				bi.smoothingQuality = BitmapSmoothingQuality.HIGH
+				bi.smooth = true
+				
+				var myShadow:spark.filters.DropShadowFilter = new DropShadowFilter();
+				
+
+				//myGlow.color = 0xFFFFFF
+				this.dati.filters = [myShadow]
+				}
+				catch(err:Error)
+				{
+					trace(err.message)
+				}
 			}
 		]]>
 	</fx:Script>
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:VGroup verticalAlign="middle" width="320" >
-		
-	<s:BitmapImage  id="bi" />
-	<s:Label text="Name:" fontFamily="BaseFont" width="320"  />
-		<s:Label fontFamily="MorrisRomanBlack" text="{nome}" width="320" fontSize="24"/>
-	<s:Label text="Level:" fontFamily="BaseFont" width="320" />
-		<s:Label fontFamily="MorrisRomanBlack" text="{lvl}" width="320" fontSize="24" />
-	<s:Label text="Race:" fontFamily="BaseFont" width="320" />
-		<s:Label fontFamily="MorrisRomanBlack" text="{race}" width="320" fontSize="24"/>
-	<s:Label text="Location:" fontFamily="BaseFont" width="320" />
-		<s:Label fontFamily="MorrisRomanBlack" text="{location}" width="320" fontSize="24"/>
-	</s:VGroup>
 	
-</s:WindowedApplication>
+	<s:VGroup id="dati" verticalAlign="middle" left="10" >
+		<s:BitmapImage  id="bi" width="180" height="108" scaleMode="zoom" />
+		<s:HGroup >
+			<s:Label text="Name:"  />
+			<s:Label fontFamily="MorrisRomanBlack" text="{nome}" fontSize="18"/>
+		</s:HGroup>
+		<s:HGroup verticalAlign="middle">
+			<s:Label text="Level:"  />
+			<s:Label fontFamily="MorrisRomanBlack" text="{lvl}" fontSize="18" />
+			<s:Group verticalCenter="0">
+			<s:Line id="lineabg" xFrom="{0}" xTo="{101}" yFrom="0" yTo="0">
+
+				<s:stroke>
+					<s:SolidColorStroke color="0x000000" weight="10" caps="round"/>
+				</s:stroke>
+			</s:Line>
+			<s:Line id="linea" xFrom="{1}" xTo="{currentExp}" yFrom="0" yTo="0">
+				
+				<s:stroke>
+					<s:SolidColorStroke color="#00ccff" weight="5" caps="round"/>
+				</s:stroke>
+			</s:Line>
+				
+			</s:Group>
+			
+		</s:HGroup>
+		<s:HGroup >
+			<s:Label text="Race:"  />
+			<s:Label fontFamily="MorrisRomanBlack" text="{race}" fontSize="18"/>
+		</s:HGroup>
+		<s:HGroup >
+			<s:Label text="Location:"  />
+			<s:Label fontFamily="MorrisRomanBlack" text="{location}" fontSize="18"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:Group>

@@ -117,7 +117,7 @@
 		<s:Move id="myMoveRight" target="{charsSlider}" />
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:HGroup id="charsSlider" width="100%" height="100%" x="0"  horizontalAlign="center" />
+	<s:HGroup id="charsSlider" width="100%" height="100%" x="0"  horizontalAlign="center" gap="20"/>
 	<s:TextArea id="leftBtn" width="100" height="100%" left="0" fontSize="120" text="" 
 				verticalAlign="middle" fontFamily="BaseFont" color="#ffffff" mouseOut="stopRight(event)" 
 				contentBackgroundAlpha="0" mouseOver="rigthBtn_mouseUpHandler(event)" borderVisible="false" 
