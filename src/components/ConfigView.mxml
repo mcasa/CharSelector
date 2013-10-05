@@ -217,7 +217,7 @@
 					enabled="false"/>
 		<s:HGroup bottom="20" width="80%" horizontalAlign="right" paddingBottom="10">
 			<s:Button id="cancell" label="Close"
-					  click="closeOpt(event)" fontFamily="BaseFont" fontSize="12" />
+					  click="closeOpt(event)" fontFamily="BaseFont" fontSize="12" visible="false"/>
 			<s:Button id="save" label="Save"
 					  click="save_clickHandler(event)" fontFamily="BaseFont" fontSize="12" />
 		</s:HGroup>

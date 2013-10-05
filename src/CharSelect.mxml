@@ -30,6 +30,7 @@
 			import org.osmf.events.TimeEvent;
 			
 			import spark.components.windowClasses.TitleBar;
+			import spark.filters.GlowFilter;
 			[SWF(frameRate="60")]
 			
 			import components.BtnChar;
@@ -85,6 +86,10 @@
 				timer.start()
 				rectNativo = new Rectangle(x,y,width,height)
 				this.filters = shadow
+				var myGlow:spark.filters.GlowFilter = new GlowFilter();
+				myGlow.blurX = 2
+				myGlow.blurY = 2
+				filters = [myGlow]
 				
 			}
 			
