@@ -570,5 +570,5 @@
 					contentBackgroundColor="#726B6B" fontWeight="bold"
 					textAlign="center" verticalAlign="middle" selectable="false" useHandCursor="false" buttonMode="true" editable="false"/>
 	</s:HGroup>
-
+<s:Label bottom="2" right="2" text="v 1.06" fontSize="12" color="#726B6B" />
 </s:WindowedApplication>
