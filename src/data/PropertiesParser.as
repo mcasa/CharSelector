@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package components  {
+package data  {
 	
 	import org.as3commons.lang.StringUtils;
 	import org.springextensions.actionscript.util.MultilineString;

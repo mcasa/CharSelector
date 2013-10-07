@@ -2,8 +2,10 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   currentState="splash" showStatusBar="false" windowComplete="initapp()"
-					   backgroundColor="#726B6B" xmlns:components="components.*" >
+					   xmlns:components="components.*"
+					   xmlns:w8ui="components.w8ui.*"
+					   backgroundColor="#726B6B" currentState="splash" showStatusBar="false"
+					   windowComplete="initapp()">
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
 		@namespace mx "library://ns.adobe.com/flex/mx";
@@ -23,8 +25,10 @@
 	</fx:Style>
 	<fx:Script>
 		<![CDATA[
+			import data.CharData;
 			import data.ConfigProperties;
 			
+			import mx.collections.ArrayList;
 			import mx.events.FlexEvent;
 			
 			import org.osmf.events.TimeEvent;
@@ -58,6 +62,11 @@
 			private var myShadow:spark.filters.DropShadowFilter = new DropShadowFilter();
 			
 			[Bindable]private var shadow:Array = [myShadow]
+				
+			private var bkpArrayFiles:Array;
+			private var autoSavesArr:Array = new Array();
+			private var charName:Array;
+				
 			private var timer:Timer = new Timer(1000, 3);
 			
 			private var rectNativo:Rectangle;
@@ -122,16 +131,6 @@
 				var ini:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/CharSelect.ini");
 				optWindow.writeFileIni(ini)
 				readAndSetI()
-				/* var stream:FileStream = new FileStream();
-				stream.open(ini, FileMode.WRITE);
-				stream.writeUTFBytes(event.target.nativePath);
-				stream.close(); */
-				//bkpfiles()
-				
-				
-				
-				
-				
 			}
 			
 			private function loadFileIni():void
@@ -139,16 +138,6 @@
 				var ini:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/CharSelect.ini");
 				optWindow.addEventListener(Event.COMPLETE, loaderComplete);
 				optWindow.readFileIni(ini)
-				
-				//this.skyPath.text = e.currentTarget.data
-				/* var url:URLRequest = new URLRequest(ini.url);
-				
-				// Define the URLLoader.
-				var loader:URLLoader = new URLLoader();
-				loader.load(url);
-				pathBtn.visible = false
-				// Listen for when the file has finished loading.
-				loader.addEventListener(Event.COMPLETE, loaderComplete); */
 				
 			}
 			
@@ -203,24 +192,33 @@
 			
 			private function readAndSetII(eve:TimerEvent):void
 			{
-				var sourceDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves");
-				var files:Array;
-				if(!sourceDir.exists)
+				var bkpFilesDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/BKP")
+				var savesDir:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves");
+				
+				if(!bkpFilesDir.exists)
+				{
+					bkpFilesDir.createDirectory()
+				}
+				bkpArrayFiles = bkpFilesDir.getDirectoryListing()
+				if(!savesDir.exists)
 					infoloading.text = "you don't have any charcters... close"
 				else
 				{
-					progressAction.addEventListener("COPY_COMPLETE", bkpComplete)
-					progressAction.startProcessForBackUp(sourceDir.nativePath, ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/BKP");
+					progressAction.addEventListener("COPY_COMPLETE", readStructure)
+					progressAction.startProcessForBackUp(savesDir.nativePath, bkpFilesDir.nativePath);
 				}
 				
 			}
 			
-			protected function bkpComplete(eve:Event):void
+			protected function readStructure(eve:Event):void
 			{
-				progressAction.removeEventListener("COPY_COMPLETE", bkpComplete)
+				progressAction.removeEventListener("COPY_COMPLETE", readStructure)
+				
 				var fromDirectory:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/BKP")
 				var files:Array = fromDirectory.getDirectoryListing()
-				var charName:Array = new Array()
+				
+				 charName = new Array()
+				
 				for (var i:uint = 0; i < files.length; i++)
 				{
 					//trace(String(files[i].name).search("Save"))
@@ -228,6 +226,9 @@
 					{
 						if(charName.indexOf(findName(files[i].name))<0)
 							charName.push(findName(files[i].name))
+					}else
+					{
+						autoSavesArr.push(files[i])
 					}
 				}
 				
@@ -240,14 +241,24 @@
 						directory.createDirectory()
 					
 				}
-				
 				progressAction.addEventListener("COPY_COMPLETE", bkpCompleteForChar)
 				progressAction.startProcessForChar(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Saves")
+				
+				
 			}
+			
+			
 			protected function bkpCompleteForChar(eve:Event):void
 			{
 				progressAction.removeEventListener("COPY_COMPLETE", bkpCompleteForChar)
-				goToUse()
+				goToMain()
+			}
+			
+			protected function goToMain():void
+			{
+				currentState = 'main'
+				charsList.setData(charName)
+				
 			}
 			
 			private function goToUse():void
@@ -359,7 +370,7 @@
 			{
 				
 				// TODO Auto-generated method stub
-			
+				
 				start();
 				/* 	var myAppProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				var myAppProcess = new NativeProcess();
@@ -496,6 +507,7 @@
 		<s:State name="use"/>
 		<s:State name="splash" />
 		<s:State name="config" />
+		<s:State name="main"/>
 	</s:states>
 	
 	
@@ -513,29 +525,38 @@
 		</s:Transition> 
 	</s:transitions>
 	
-	<s:BitmapImage id="bgImg" scaleMode="stretch" left="0" right="0" top="0" bottom="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
+	<s:BitmapImage visible="false" id="bgImg" scaleMode="stretch" left="0" right="0" top="0" bottom="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
 				   complete="resizeImg(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}" includeInLayout="false" includeInLayout.splash="true"/>
 	
-	<s:BitmapImage id="splashScreen"  scaleMode="zoom" left="0" right="0" top="0" bottom="0" includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
+	<s:BitmapImage visible="false" id="splashScreen"  scaleMode="zoom" left="0" right="0" top="0" bottom="0" includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
 				   complete="bgImg_completeHandler(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}"/>
-	<s:VGroup verticalCenter="0" horizontalCenter="0" horizontalAlign="center" id="titleSkyrim"
-			  width="100%">
-		<s:Label id="skyrimTitle" fontSize="65" text="skyrim" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
-				 color="#FDFCFC" fontFamily="BaseFont" verticalAlign="middle" verticalCenter="0" filters="{shadow}"/>
-		<s:Line id="linea" xFrom="{skyrimTitle.x}" xTo="{skyrimTitle.width}" yFrom="0" yTo="0" includeIn="splash" includeInLayout="false" includeInLayout.splash="true" filters="{shadow}">
+	<s:VGroup id="titleSkyrim" includeIn="config,splash,use" width="100%" horizontalAlign="center"
+			  horizontalCenter="0" verticalCenter="0">
+		<s:Label id="skyrimTitle" includeIn="splash" color="#FDFCFC" filters="{shadow}"
+				 fontFamily="BaseFont" fontSize="65" includeInLayout="true" text=""
+				 textAlign="center" verticalAlign="middle" verticalCenter="0"/>
+		<s:Line id="linea" includeIn="splash" filters="{shadow}" includeInLayout="true"
+				xFrom="{skyrimTitle.x}" xTo="{skyrimTitle.width}" yFrom="0" yTo="0">
 			<!-- Define the border color of the line. -->
 			<s:stroke>
 				<s:SolidColorStroke color="0xffffff" weight="3" caps="round"/>
 			</s:stroke>
 		</s:Line>
-		<s:Label id="skyrimSubTitle" fontSize="42" text="select character tool" textAlign="center" includeIn="splash" includeInLayout="false" includeInLayout.splash="true"
-				 color="#FDFCFC" fontFamily="MorrisRomanBlack" verticalAlign="middle" verticalCenter="0" filters="{shadow}"/>
+		<s:Label id="skyrimSubTitle" includeIn="splash" color="#FDFCFC" filters="{shadow}"
+				 fontFamily="MorrisRomanBlack" fontSize="42" includeInLayout="true"
+				 text="" textAlign="center" verticalAlign="middle"
+				 verticalCenter="0"/>
 		
 	</s:VGroup>
-	<s:VGroup height="100%" width="100%">
-		<s:TextArea includeIn="use" borderVisible="false" color="#FDF9F9" width="100%" top="0"
-				contentBackgroundAlpha="0.0" contentBackgroundColor="#726B6B" editable="false" selectable="false" fontSize="24"
-				text="select Character:" textAlign="center" verticalAlign="middle" fontFamily="BaseFont" filters="{shadow}" />
+	<s:VGroup includeIn="config,splash,use" width="100%" height="100%">
+		<components:FilesProgressBar id="progressAction" width="100%"
+									 bottom.config="0"
+									 bottom.splash="0"
+									 bottom.use="0"/>
+		<s:TextArea includeIn="use" top="0" width="100%" borderVisible="false" color="#FDF9F9"
+					contentBackgroundAlpha="0.0" contentBackgroundColor="#726B6B" editable="false"
+					filters="{shadow}" fontFamily="BaseFont" fontSize="24" selectable="false"
+					text="select Character:" textAlign="center" verticalAlign="middle"/>
 		<components:CharSlider id="chars" includeIn="use" width="100%" />
 		<s:Label id="labelText" fontSize="16" textAlign="center" visible="true" includeIn="use" filters="{shadow}"
 				 color="#FDFCFC" fontFamily="BaseFont" bottom="140"
@@ -543,21 +564,22 @@
 				 verticalAlign="middle"/>
 	</s:VGroup>
 	
-	<s:HGroup bottom="10" horizontalCenter="0" id="pathTool"
-			  verticalAlign.use="contentJustify" visible.splash="false">
-		<s:TextArea id="skyPath" width="400" height="20" borderVisible="false" color="#FDF9F9" visible.use="false"
-					contentBackgroundColor="#726B6B" verticalAlign="middle"
+	<s:HGroup id="pathTool" includeIn="config,splash,use" bottom="10" horizontalCenter="0"
+			  visible.splash="false"
+			  verticalAlign.use="contentJustify">
+		<s:TextArea id="skyPath" width="400" height="20" borderVisible="false" color="#FDF9F9"
+					contentBackgroundColor="#726B6B" editable="false" selectable="false"
+					textAlign="right" verticalAlign="middle"
 					fontWeight.config="bold"
-					contentBackgroundAlpha.use="0.0" textAlign="right" selectable="false" editable="false"/>
-		<s:Button id="pathBtn" label="Select Path" visible.use="false"
-				  click="chooseSkyrimPath(event)"/>
+					visible.use="false" contentBackgroundAlpha.use="0.0"/>
+		<s:Button id="pathBtn" label="Select Path" click="chooseSkyrimPath(event)"
+				  visible.use="false"/>
 	</s:HGroup>
 	
 	<components:StartButton includeIn="use" bottom="30" width="100" height="100" label="start" id="startSkyrim" 
 							click="button1_clickHandler(event)"
-							horizontalCenter="0" filters="{shadow}"/>
+							horizontalCenter="0" filters="{shadow}" visible="false"/>
 	<s:Label id="infoloading" filters="{shadow}" fontSize="24" textAlign="center" color="#ffffff" fontFamily="BaseFont" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
-	<components:FilesProgressBar id="progressAction" width="100%" bottom="0"/>
 	<components:ConfigView id="optWindow" verticalCenter="0" right="0" width="250" visible="false" />
 	<components:ModsList id="modWindow" visible="false" width="250" verticalCenter="0" left="0" />
 	<s:HGroup id="bar" width="100%" horizontalAlign="right" top="5" right="5" mouseDown="OnDrag(event)" doubleClick="hgroup1_doubleClickHandler(event)" doubleClickEnabled="true">
@@ -571,5 +593,21 @@
 					contentBackgroundColor="#726B6B" fontWeight="bold"
 					textAlign="center" verticalAlign="middle" selectable="false" useHandCursor="false" buttonMode="true" editable="false"/>
 	</s:HGroup>
-<s:Label bottom="2" right="2" text="v 1.06" fontSize="12" color="#726B6B" />
+	<s:Label bottom="2" right="2" text="v 1.06" fontSize="12" color="#726B6B" />
+	<s:HGroup includeIn="main" x="10" top="200" bottom="30" width="808">
+		<s:VGroup width="300" height="100%">
+			<s:Label fontFamily="BaseFont" fontSize="26" text="Select:"/>
+			<w8ui:ListChar id="charsList">
+			</w8ui:ListChar>
+		</s:VGroup>
+		<s:VGroup width="100%" height="100%">
+			<components:BtnChar id="charData" width="100%" height="209">
+			</components:BtnChar>
+			<s:Group width="100%" height="100%">
+				<s:Label right="0" bottom="0" color="#FEFDFD" fontFamily="BaseFont" fontSize="36"
+						 text="start" click="button1_clickHandler(event)" />
+				<s:Label y="92" right="128" width="374" text="Selected:" textAlign="right"/>
+			</s:Group>
+		</s:VGroup>
+	</s:HGroup>
 </s:WindowedApplication>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="components.*">
+		  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="components.*" xmlns:w8ui="components.w8ui.*">
 	<fx:Script>
 		<![CDATA[
 			private var _charArray:Array;
@@ -11,12 +11,12 @@
 				
 				for(var i:Number = 0; i<charArray.length; i++)
 				{
-					var chTmp:CharElement = new CharElement()
+					/* var chTmp:CharElement = new CharElement()
 						chTmp.setCharElement(charArray[i].nome, charArray[i].lvl, charArray[i].file)
 						chTmp.addEventListener(MouseEvent.MOUSE_OVER, rollToMe)
 						chTmp.addEventListener(MouseEvent.MOUSE_OVER, rollOutMe)
 						_charArray.push(chTmp)
-						charList.addElement(chTmp)
+						charList.addElement(chTmp) */
 				}
 				
 			}
@@ -49,5 +49,5 @@
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	<s:VGroup id="charList" />
-	<components:CharData id="charData"/>
+	<w8ui:CharUI id="charData"/>
 </s:HGroup>

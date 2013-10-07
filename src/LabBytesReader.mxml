@@ -4,7 +4,7 @@
 					   xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="readFileIntoByteArray(event)">
 	<fx:Script>
 		<![CDATA[
-			import components.ConfigProperties;
+			import data.ConfigProperties;
 			
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:abc="org.as3commons.bytecode.abc.*">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayList;
+			
+			import spark.events.IndexChangeEvent;
+			private var dp:ArrayList
+			private var _clickOnName:Boolean = false;
+			
+			[Bindable(event="CLICK_ON_NAME")]
+			public function get clickOnName():Boolean
+			{
+				
+				return _clickOnName;
+			}
+			
+			public function setData(arrayList:Array):void
+			{
+				var tmpArrList:ArrayList = new ArrayList()
+				for(var i:Number=0; i<arrayList.length; i++)
+				{
+					
+					tmpArrList.addItem({nome:arrayList[i]})
+				}
+				
+				list.dataProvider = tmpArrList
+				
+			}
+			
+			private function selectionChangingHandler(evt:IndexChangeEvent):void 
+			{
+				var item:* = list.dataProvider.getItemAt(evt.newIndex);
+				trace(item.nome)
+				_clickOnName = true
+			}
+			
+		]]>
+	</fx:Script>
+	<s:List id="list" changing="selectionChangingHandler(event);" contentBackgroundAlpha="0" selectionColor="{null}" rollOverColor="{null}">
+		<!-- itemRenderer is inline in this sample -->
+		<s:itemRenderer>
+			<fx:Component>
+				<s:ItemRenderer>
+					<s:states>
+						<s:State name="normal" />
+						<s:State name="hovered" />
+						<s:State name="selected" />
+					</s:states>
+					<s:Rect left="0" right="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="0x999999" alpha.normal="0" alpha.hovered="0" alpha.selected="0" />
+						</s:fill>
+						<s:stroke>
+							<s:SolidColorStroke color="#000000" />
+						</s:stroke>
+					</s:Rect>
+					<s:BitmapImage id="bgImg" scaleMode="zoom" smooth="true" smoothingQuality="high" rotation="90" visible.normal="false" right="-5" visible.hovered="true" visible.selected="true" scaleY="-1" top="1" width="30" height="30" source.normal="{null}" source.hovered="{'file://'+File.applicationDirectory.nativePath+'/assets/arrow.png'}" source.selected="{'file://'+File.applicationDirectory.nativePath+'/assets/arrow.png'}" />
+					<s:Label verticalAlign="middle" top="5" left="5" right="5" bottom="5" id="nameLabel"  text="{data.nome}" fontFamily="MorrisRomanBlack" fontSize="18" width="100%" color="#ffffff"/>
+				</s:ItemRenderer>
+			</fx:Component>
+		</s:itemRenderer>
+		<!--<s:dataProvider>
+			<s:ArrayList>
+				<fx:Object type="hr" firstName="Ann"  lastName="Green"  />
+				<fx:Object type="employee" firstName="Tom"  lastName="Smith" phone="415-155-1212" />
+				<fx:Object type="employee" firstName="John" lastName="Black" phone="408-344-1234" />
+				<fx:Object type="employee" firstName="Jane" lastName="White" phone="415-235-7878" />
+				<fx:Object type="employee" firstName="Bill" lastName="Jones" phone="415-875-7800" />
+			</s:ArrayList>
+		</s:dataProvider>-->
+	</s:List>
+</s:VGroup>

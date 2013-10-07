@@ -4,6 +4,7 @@
 		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300">
 	<fx:Script>
 		<![CDATA[
+			import data.ConfigProperties;
 			private static const SAVE_GAME_PATH:String = "My Games/Skyrim/";
 			
 			private var fileDone:Number = 0;
@@ -39,8 +40,6 @@
 				pBar.label = "Create backup directory"
 				
 				var bkpDir:File = new File(to)
-				if(!bkpDir.exists)
-					bkpDir.createDirectory()
 				fileDone = 0;		
 				totalFiles = files.length-1
 				_files = files

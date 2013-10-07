@@ -5,7 +5,7 @@
 	<fx:Script>
 		<![CDATA[
 			import components.CharList;
-			import components.ConfigProperties;
+			import data.ConfigProperties;
 			
 			import mx.events.FlexEvent;
 			

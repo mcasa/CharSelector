@@ -5,14 +5,15 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import data.CharData;
 			[Bindable]private var nome:String;
 			[Bindable]private var lvl:Number;
-			public var fileRef:String;
-			public function setCharElement(charName:String, level:Number, file:String):void
+			public var charData:CharData;
+			public function setCharElement(char:CharData):void
 			{
-				nome = charName
-					lvl = level
-					fileRef = file
+					nome = char.nome
+					lvl = char.lvl
+					charData = char
 				
 			}
 			public function set selectedChar(value:Boolean):void

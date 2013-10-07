@@ -40,14 +40,18 @@
     <application path="Lab.mxml">
       <airExcludes/>
     </application>
+    <application path="CharSelectorW8.mxml">
+      <airExcludes/>
+    </application>
   </applications>
   <modules/>
   <buildCSSFiles/>
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
     <buildTarget buildTargetName="default">
-      <airSettings airCertificatePath="C:/Users/Darkside/Adobe Flash Builder 4.5/CharSelect/bin-debug/charCert.p12" airTimestamp="false" version="1">
+      <airSettings airCertificatePath="C:/Users/Darkside/Adobe Flash Builder 4.5/CharSelect/bin-debug/charCert.p12" airTimestamp="false" anePathSet="false" version="1">
         <airExcludes/>
+        <anePaths/>
       </airSettings>
       <actionScriptSettings version="1"/>
     </buildTarget>
