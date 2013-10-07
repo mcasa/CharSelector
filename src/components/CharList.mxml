@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="components.*">
+	<fx:Script>
+		<![CDATA[
+			private var _charArray:Array;
+			public function setList(charArray:Array):void
+			{
+				_charArray = new Array()
+				
+				for(var i:Number = 0; i<charArray.length; i++)
+				{
+					var chTmp:CharElement = new CharElement()
+						chTmp.setCharElement(charArray[i].nome, charArray[i].lvl, charArray[i].file)
+						chTmp.addEventListener(MouseEvent.MOUSE_OVER, rollToMe)
+						chTmp.addEventListener(MouseEvent.MOUSE_OVER, rollOutMe)
+						_charArray.push(chTmp)
+						charList.addElement(chTmp)
+				}
+				
+			}
+			
+			protected function rollToMe(eve:MouseEvent):void
+			{
+				var chSelected:CharElement = eve.currentTarget as CharElement;
+				for(var i:Number = 0; i<_charArray.length; i++)
+				{
+					if(_charArray[i] != chSelected)
+						_charArray[i].selectedChar = false
+					else
+						_charArray[i].selectedChar = true
+				}
+			}
+			
+			protected function rollOutMe(eve:MouseEvent):void
+			{
+				var chSelected:CharElement = eve.currentTarget as CharElement;
+				for(var i:Number = 0; i<_charArray.length; i++)
+				{
+					_charArray[i].selectedChar = false
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup id="charList" />
+	<components:CharData id="charData"/>
+</s:HGroup>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300" creationComplete="initComp()">
+		 xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="initComp()">
 	
 	<fx:Script>
 		<![CDATA[
@@ -33,7 +33,7 @@
 			{
 				if(speed<14)
 					speed +=2
-				if(this.charsSlider.x>980-this.charsSlider.width)
+				if(this.charsSlider.x>stage.nativeWindow.width-this.charsSlider.width)
 					this.charsSlider.x -= speed
 			}
 			
@@ -44,7 +44,7 @@
 				myMoveLeft.duration = 200
 				myMoveLeft.xFrom = this.charsSlider.x
 				myMoveLeft.xTo=this.charsSlider.x-10
-				if(this.charsSlider.x>980-this.charsSlider.width)
+				if(this.charsSlider.x>stage.nativeWindow.width-this.charsSlider.width)
 				myMoveLeft.play();
 				this.removeEventListener(Event.ENTER_FRAME, startLeft)
 				
@@ -117,16 +117,20 @@
 		<s:Move id="myMoveRight" target="{charsSlider}" />
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:HGroup id="charsSlider" width="100%" height="100%" x="0"  horizontalAlign="center" gap="20"/>
-	<s:TextArea id="leftBtn" width="100" height="100%" left="0" fontSize="120" text="" 
+	<s:Group width="100%" height="200">
+		
+	<s:HGroup id="charsSlider" width="90%" height="100%" x="0"  horizontalAlign="center" gap="20" />
+		
+
+	<s:TextArea id="leftBtn" width="100" height="100%" left="0" fontSize="120" text="" contentBackgroundColor="#ff0000" borderVisible="true"
 				verticalAlign="middle" fontFamily="BaseFont" color="#ffffff" mouseOut="stopRight(event)" 
-				contentBackgroundAlpha="0" mouseOver="rigthBtn_mouseUpHandler(event)" borderVisible="false" 
+				contentBackgroundAlpha="1" mouseOver="rigthBtn_mouseUpHandler(event)" 
 				selectable="false" editable="false"
 				visible="false"/>
 	
-	<s:TextArea id="rigthBtn" width="100" height="100%" right="0" fontSize="120" text="" 
+	<s:TextArea id="rigthBtn" width="100" height="100%" right="0" fontSize="120" text="" contentBackgroundColor="#ff0000" borderVisible="true"
 				verticalAlign="middle" fontFamily="BaseFont" textAlign="right" color="#ffffff" 
-				mouseOut="stopLeft(event)" contentBackgroundAlpha="0" mouseOver="leftBtn_mouseUpHandler(event)" 
-				borderVisible="false" selectable="false" editable="false"
+				mouseOut="stopLeft(event)" contentBackgroundAlpha="0" mouseOver="leftBtn_mouseUpHandler(event)" selectable="false" editable="false"
 				visible="false"/>
+	</s:Group>
 </s:Group>

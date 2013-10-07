@@ -13,6 +13,7 @@
 			
 			import org.springextensions.actionscript.ioc.config.impl.xml.namespacehandler.INamespaceHandler;
 			
+			import spark.components.Application;
 			import spark.filters.DropShadowFilter;
 			
 			private var inBytes:ByteArray = new ByteArray(); 
@@ -29,14 +30,14 @@
 				
 			public function readFileIntoByteArray(fileName:String):void 
 			{ 
-				trace("start loaded" + fileName)
+				traceThis("start loaded" + fileName)
 				var inFile:File = new File(fileName) // source folder is desktop 
 				//inFile = inFile.resolvePath("Salva.ess");  // name of file to read 
 				var inStream:FileStream = new FileStream();
 				
 				inStream.open(inFile, FileMode.READ); 
 				inStream.readBytes(inBytes); 
-				trace("done")
+				traceThis("done")
 				inStream.close();
 				
 				loaded2()
@@ -51,49 +52,49 @@
 				var tmpArr:ByteArray = new ByteArray()
 				var ni:int;
 				inBytes.endian = Endian.LITTLE_ENDIAN
-				trace(inBytes.readUTFBytes(13))
-				trace('1',inBytes.position)
+				traceThis(inBytes.readUTFBytes(13))
+				traceThis('1',inBytes.position)
 				
-				trace(inBytes.readInt())
-				trace('2',inBytes.position)
-				trace(inBytes.readInt())
-				trace('3',inBytes.position)
-				trace(inBytes.readInt())
-				trace('4',inBytes.position)
-				trace(ni = inBytes.readShort())
-				trace('5',inBytes.position)
+				traceThis(inBytes.readInt())
+				traceThis('2',inBytes.position)
+				traceThis(inBytes.readInt())
+				traceThis('3',inBytes.position)
+				traceThis(inBytes.readInt())
+				traceThis('4',inBytes.position)
+				traceThis(ni = inBytes.readShort())
+				traceThis('5',inBytes.position)
 				nome = inBytes.readUTFBytes(ni)
-				trace('6',inBytes.position)
+				traceThis('6',inBytes.position)
 				lvl = inBytes.readInt();
-				trace('7',inBytes.position);
-				trace(ni = inBytes.readShort())
-				trace('8',inBytes.position);
+				traceThis('7',inBytes.position);
+				traceThis(ni = inBytes.readShort())
+				traceThis('8',inBytes.position);
 				location = inBytes.readUTFBytes(ni)
-				trace('9',inBytes.position);
-				trace(ni = inBytes.readShort())
-				trace('10',inBytes.position);
-				trace(inBytes.readUTFBytes(ni))
-				trace('11',inBytes.position);
-				trace(ni = inBytes.readShort())
-				trace('12',inBytes.position);
+				traceThis('9',inBytes.position);
+				traceThis(ni = inBytes.readShort())
+				traceThis('10',inBytes.position);
+				traceThis(inBytes.readUTFBytes(ni))
+				traceThis('11',inBytes.position);
+				traceThis(ni = inBytes.readShort())
+				traceThis('12',inBytes.position);
 				race = inBytes.readUTFBytes(ni)
-				trace('13',inBytes.position);
+				traceThis('13',inBytes.position);
 				sex = inBytes.readShort().toString()
-				trace('14',inBytes.position);
+				traceThis('14',inBytes.position);
 				currentExp = inBytes.readFloat()
-				trace('15',inBytes.position);
+				traceThis('15',inBytes.position);
 				nextLevExp = inBytes.readFloat()
-				trace('16',inBytes.position);
-				trace(inBytes.readDouble())
-				trace('17',inBytes.position);
-				trace(w = inBytes.readInt())
-				trace('18',inBytes.position);
-				trace(h = inBytes.readInt())
-				trace('19',inBytes.position);
-				/* trace(inBytes.readInt())
-				trace('20',inBytes.position);
-				trace(inBytes.readByte())
-				trace('21',inBytes.position); */
+				traceThis('16',inBytes.position);
+				traceThis(inBytes.readDouble())
+				traceThis('17',inBytes.position);
+				traceThis(w = inBytes.readInt())
+				traceThis('18',inBytes.position);
+				traceThis(h = inBytes.readInt())
+				traceThis('19',inBytes.position);
+				/* traceThis(inBytes.readInt())
+				traceThis('20',inBytes.position);
+				traceThis(inBytes.readByte())
+				traceThis('21',inBytes.position); */
 				l = 3*w*h
 				if(currentExp>nextLevExp)
 					currentExp=100
@@ -106,9 +107,9 @@
 				//bitmapBA.endian = Endian.LITTLE_ENDIAN
 				inBytes.readBytes(bitmapBA,0,l)
 				
-				trace('20',inBytes.position);
-				trace(inBytes.readByte())
-				trace('21',inBytes.position);
+				traceThis('20',inBytes.position);
+				traceThis(inBytes.readByte())
+				traceThis('21',inBytes.position);
 				bitmapData = new BitmapData(w, h);
 				bitmapBA.position = 0
 				bitmapBA.endian = Endian.LITTLE_ENDIAN
@@ -146,8 +147,14 @@
 				}
 				catch(err:Error)
 				{
-					trace(err.message)
+					traceThis(err.message)
 				}
+			}
+			
+			private function traceThis(msg1:*,msg2:*=""):void
+			{
+				
+				logger.text += msg1+ ' '+msg2 + '\n';
 			}
 		]]>
 	</fx:Script>
@@ -189,5 +196,6 @@
 			<s:Label text="Location:"  />
 			<s:Label fontFamily="MorrisRomanBlack" text="{location}" fontSize="18"/>
 		</s:HGroup>
+		<s:TextArea id="logger" height="300" verticalScrollPolicy="auto" color="#000000" visible="false"/>
 	</s:VGroup>
 </s:Group>

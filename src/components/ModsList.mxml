@@ -65,5 +65,5 @@
 		<s:TextArea width="90%" height="20" borderVisible="false" color="#FDF9F9" editable="false" contentBackgroundAlpha="0" selectable="false"
 					 fontFamily="BaseFont" text="Installed Mods:"/>
 		<s:DataGrid id="dataGrid" width="75%" borderVisible="false" fontSize="10" color="#ffffff" enabled="true" horizontalScrollPolicy="off" height="100%" editable="false" verticalScrollPolicy="auto" />
-	</s:VGroup>	
+		</s:VGroup>	
 </s:Group>

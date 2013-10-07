@@ -4,6 +4,9 @@
 					   xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="readFileIntoByteArray(event)">
 	<fx:Script>
 		<![CDATA[
+			import components.ConfigProperties;
+			
+			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			import mx.graphics.BitmapSmoothingQuality;
 			import mx.graphics.codec.JPEGEncoder;
@@ -13,7 +16,7 @@
 			
 			import org.springextensions.actionscript.ioc.config.impl.xml.namespacehandler.INamespaceHandler;
 			
-			private var inBytes:ByteArray = new ByteArray(); 
+			
 			
 			[Bindable]private var nome:String;
 			[Bindable]private var lvl:String;
@@ -23,28 +26,45 @@
 			[Bindable]private var currentExp:Number;
 			[Bindable]private var nextLevExp:Number;
 			
+			private var arrChar:Array;
+			private var arrCharacter:Array = new Array;
+			[Bindable]private var coll:ArrayCollection;
+			
 			private function readFileIntoByteArray(eve:FlexEvent):void 
 			{ 
 				trace("start loaded")
-				var inFile:File = File.desktopDirectory; // source folder is desktop 
-				inFile = inFile.resolvePath("Salva.ess");  // name of file to read 
+				var inFile:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Chars/Alipsya")
+				arrChar = inFile.getDirectoryListing()
+			//inFile = inFile.resolvePath("Salva.ess");  // name of file to read
+				var _inBytes:ByteArray = new ByteArray(); 
 				var inStream:FileStream = new FileStream();
+				for(var i:Number = 0; i<arrChar.length-1;i++)
+				{
+					if(arrChar[i].extension == "ess")
+					{
+					_inBytes = new ByteArray()
+					inStream.open(arrChar[i], FileMode.READ); 
+					inStream.readBytes(_inBytes); 
+					trace("done")
+					inStream.close();
+					arrCharacter.push(loaded2(_inBytes))
+					}
+				}
+				coll = new ArrayCollection(arrCharacter)
 				
-				inStream.open(inFile, FileMode.READ); 
-				inStream.readBytes(inBytes); 
-				trace("done")
-				inStream.close();
-				
-				loaded2()
+			
 			} 
-			protected function loaded2():void
+			protected function loaded2(inBytes:ByteArray):Object
 			{
+				try
+				{
 				var w:int;
 				var h:int;
 				var l:uint;
 				var tmpArr:ByteArray = new ByteArray()
 					var ni:int;
 				inBytes.endian = Endian.LITTLE_ENDIAN
+				inBytes.position = 0
 				trace(inBytes.readUTFBytes(13))
 				trace('1',inBytes.position)
 				
@@ -124,9 +144,24 @@
 				var bit:Bitmap = new Bitmap(bitmapData)
 			
 					
-					bi.source = bit
+				/* 	bi.source = bit
 					bi.smoothingQuality = BitmapSmoothingQuality.HIGH
-					bi.smooth = true
+					bi.smooth = true */
+				}
+			catch(err:Error)
+			{
+			}
+				var tmpObj:Object = new Object;
+				tmpObj.nome = nome
+				tmpObj.lvl = lvl
+				tmpObj.location = location
+				tmpObj.race = race
+				tmpObj.sex = sex
+				tmpObj.currentExp = currentExp
+				tmpObj.nextLevExp = nextLevExp
+				tmpObj.img = bit
+				return tmpObj;
+				
 					
 			}
 		]]>
@@ -134,9 +169,12 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<s:VGroup verticalAlign="middle" width="320" >
+	<s:DataGrid id="dataGrid" dataProvider="{coll}" height="100%" width="100%" />
+	
+	<!--<s:VGroup verticalAlign="middle" width="320" >
 		
 	<s:BitmapImage  id="bi" />
+	
 	<s:Label text="Name:" fontFamily="BaseFont" width="320"  />
 		<s:Label fontFamily="MorrisRomanBlack" text="{nome}" width="320" fontSize="24"/>
 	<s:Label text="Level:" fontFamily="BaseFont" width="320" />
@@ -145,6 +183,6 @@
 		<s:Label fontFamily="MorrisRomanBlack" text="{race}" width="320" fontSize="24"/>
 	<s:Label text="Location:" fontFamily="BaseFont" width="320" />
 		<s:Label fontFamily="MorrisRomanBlack" text="{location}" width="320" fontSize="24"/>
-	</s:VGroup>
+	</s:VGroup>-->
 	
 </s:WindowedApplication>

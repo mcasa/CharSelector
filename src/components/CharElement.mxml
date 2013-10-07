@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" contentBackgroundAlpha="1" contentBackgroundColor="#ff" >
+	
+	<fx:Script>
+		<![CDATA[
+			[Bindable]private var nome:String;
+			[Bindable]private var lvl:Number;
+			public var fileRef:String;
+			public function setCharElement(charName:String, level:Number, file:String):void
+			{
+				nome = charName
+					lvl = level
+					fileRef = file
+				
+			}
+			public function set selectedChar(value:Boolean):void
+			{
+				bgImg.visible = value
+				
+			}
+			
+			public function get label():String
+			{
+				return this.testo.text;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup  left="10">
+		<s:Line id="lineaU" xFrom="{0}" xTo="200" yFrom="0" yTo="0">
+			<s:stroke>
+				<s:SolidColorStroke color="#ffffff" weight="1" caps="square"/>
+			</s:stroke>
+		</s:Line>
+	<s:HGroup >
+		<s:Label left="10" fontFamily="MorrisRomanBlack" text="{nome}" fontSize="18" width="75%" color="#ffffff" id="testo"/>
+		<s:Label fontFamily="MorrisRomanBlack" text="{lvl}" fontSize="18" width="25%" color="#ffffff"/>
+	</s:HGroup>
+	<s:Line id="lineaD" xFrom="{0}" xTo="{200}" yFrom="0" yTo="0" top="-1">
+		<s:stroke>
+			<s:SolidColorStroke color="#ffffff" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+	</s:VGroup>
+	<s:BitmapImage id="bgImg" scaleMode="zoom" smooth="true" smoothingQuality="high" rotation="90" visible="false" scaleY="-1" top="1" width="30" height="30" right="-30" source="{'file://'+File.applicationDirectory.nativePath+'/assets/arrow.png'}" />
+</s:Group>
