@@ -4,7 +4,7 @@
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   xmlns:components="components.*"
 					   xmlns:w8ui="components.w8ui.*"
-					   backgroundColor="#726B6B" currentState="splash" showStatusBar="false"
+					   backgroundColor="#1d1d1d" currentState="splash" showStatusBar="false" width="980" height="600"
 					   windowComplete="initapp()">
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
@@ -21,6 +21,26 @@
 			embed-as-cff : true;
 			fontWeight: normal;
 		}
+		@font-face{
+			src:url("font/segoeui.ttf");
+			fontFamily: "Segoeui";
+			embed-as-cff : true;
+			fontWeight: normal;
+		}
+		
+		@font-face{
+			src:url("font/weblysleekuil.ttf");
+			fontFamily: "Metro";
+			embed-as-cff : true;
+			fontWeight: normal;
+		}
+		
+		@font-face{
+			src:url("font/CartoGothicStd-Book.otf");
+			fontFamily: "Metro";
+			embed-as-cff : true;
+			fontWeight: bold;
+		}
 		
 	</fx:Style>
 	<fx:Script>
@@ -29,6 +49,7 @@
 			import data.ConfigProperties;
 			
 			import mx.collections.ArrayList;
+			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			
 			import org.osmf.events.TimeEvent;
@@ -257,8 +278,50 @@
 			protected function goToMain():void
 			{
 				currentState = 'main'
+				charsList.addEventListener('CLICK_ON_NAME', clickOnName)
 				charsList.setData(charName)
 				
+			}
+			
+			protected function clickOnName(eve:Event):void
+			{
+				charData.visible = false;
+				var str:String = eve.currentTarget.selectedName as String
+				
+				var directory:File =new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+"/Chars/"+str)
+				var arrtmp:Array = directory.getDirectoryListing()
+				var arr:Array = new Array();
+				for(var i:Number = 0; i<arrtmp.length; i++)
+				{
+					if(arrtmp[i].extension == 'ess')
+					{
+						arr.push(arrtmp[i])
+					}
+				}
+				if(arr.length>0)
+				{
+					var selectedFile:File = arr[0]
+					for(var i:Number = 1; i<arr.length; i++)
+					{
+							if(arr[i].creationDate<selectedFile.creationDate)
+								selectedFile = arr[i]
+						
+					}
+					//var charD:CharData = new CharData(selectedFile)	
+					charData.addEventListener("DATA_COMPLETE", dataComplete)
+					charData.load(selectedFile)
+					
+					charData.visible = true
+				}else
+				{
+					Alert.show("char list empty")
+				}
+			}
+			
+			private function dataComplete(eve:Event):void
+			{
+				trace("complete")
+				charData.invalidateDisplayList()
 			}
 			
 			private function goToUse():void
@@ -525,11 +588,11 @@
 		</s:Transition> 
 	</s:transitions>
 	
-	<s:BitmapImage visible="false" id="bgImg" scaleMode="stretch" left="0" right="0" top="0" bottom="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
-				   complete="resizeImg(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}" includeInLayout="false" includeInLayout.splash="true"/>
+	<s:BitmapImage visible="true" id="bgImg" scaleMode="stretch" left="0" right="0" top="0" bottom="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background3.jpg'}" 
+				   complete="resizeImg(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}" includeInLayout="false" includeInLayout.splash="true" alpha="0.3"/>
 	
-	<s:BitmapImage visible="false" id="splashScreen"  scaleMode="zoom" left="0" right="0" top="0" bottom="0" includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
-				   complete="bgImg_completeHandler(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}"/>
+	<s:BitmapImage visible="true" id="splashScreen"  scaleMode="zoom" left="0" right="0" top="0" bottom="0" includeIn="splash"  horizontalCenter="0" source="{'file://'+File.applicationDirectory.nativePath+'/assets/background.jpg'}" 
+				   complete="bgImg_completeHandler(event)" ioError="{trace(File.applicationDirectory.nativePath+'/assets/background1.jpg')}" />
 	<s:VGroup id="titleSkyrim" includeIn="config,splash,use" width="100%" horizontalAlign="center"
 			  horizontalCenter="0" verticalCenter="0">
 		<s:Label id="skyrimTitle" includeIn="splash" color="#FDFCFC" filters="{shadow}"
@@ -573,40 +636,43 @@
 					fontWeight.config="bold"
 					visible.use="false" contentBackgroundAlpha.use="0.0"/>
 		<s:Button id="pathBtn" label="Select Path" click="chooseSkyrimPath(event)"
-				  visible.use="false"/>
+				  chromeColor.config="#FDFBFB" cornerRadius.config="0" fontFamily.config="Metro"
+				  visible.use="false" cornerRadius="0" />
 	</s:HGroup>
 	
 	<components:StartButton includeIn="use" bottom="30" width="100" height="100" label="start" id="startSkyrim" 
 							click="button1_clickHandler(event)"
 							horizontalCenter="0" filters="{shadow}" visible="false"/>
-	<s:Label id="infoloading" filters="{shadow}" fontSize="24" textAlign="center" color="#ffffff" fontFamily="BaseFont" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
+	<s:Label id="infoloading" filters="{shadow}" fontSize="20" textAlign="center" color="#ffffff" fontFamily="Metro" horizontalCenter="0" verticalCenter="0" text="select skyrim application folder - click on button" includeIn="config"/>
 	<components:ConfigView id="optWindow" verticalCenter="0" right="0" width="250" visible="false" />
 	<components:ModsList id="modWindow" visible="false" width="250" verticalCenter="0" left="0" />
 	<s:HGroup id="bar" width="100%" horizontalAlign="right" top="5" right="5" mouseDown="OnDrag(event)" doubleClick="hgroup1_doubleClickHandler(event)" doubleClickEnabled="true">
 		<components:BtnSimple width="20" height="20" toolTip="Settings" click="optionWindow(event)" useHandCursor="true"/>
 		<s:TextArea toolTip="Minimize" id="minimizeBtn" width="20" click="minimizeEvent(event)" text="_"
-					height="20" borderColor="#000000" color="#000000"
-					contentBackgroundColor="#726B6B" fontWeight="bold"
+					height="20" borderColor="#ffffff" color="#ffffff"
+					contentBackgroundColor="#726B6B" fontWeight="bold" contentBackgroundAlpha="0"
 					textAlign="center" verticalAlign="middle" selectable="false" useHandCursor="true" buttonMode="true" editable="false"/>
 		<s:TextArea toolTip="Exit" id="closeBtn" width="20" click="closeEvent(event)" text="X"
-					height="20" borderColor="#000000" color="#000000"
-					contentBackgroundColor="#726B6B" fontWeight="bold"
+					height="20" borderColor="#ffffff" color="#ffffff"
+					contentBackgroundColor="#726B6B" fontWeight="bold" contentBackgroundAlpha="0"
 					textAlign="center" verticalAlign="middle" selectable="false" useHandCursor="false" buttonMode="true" editable="false"/>
 	</s:HGroup>
 	<s:Label bottom="2" right="2" text="v 1.06" fontSize="12" color="#726B6B" />
-	<s:HGroup includeIn="main" x="10" top="200" bottom="30" width="808">
-		<s:VGroup width="300" height="100%">
-			<s:Label fontFamily="BaseFont" fontSize="26" text="Select:"/>
-			<w8ui:ListChar id="charsList">
-			</w8ui:ListChar>
+	<s:HGroup includeIn="main" left="10" right="0" top="200" bottom="30" gap="40">
+		<s:VGroup width="320" height="100%">
+			<s:Label fontFamily="Metro" fontSize="36" text="Select character:" color="#ffffff"/>
+			<w8ui:ListChar id="charsList" width="100%" height="100%" />
 		</s:VGroup>
-		<s:VGroup width="100%" height="100%">
-			<components:BtnChar id="charData" width="100%" height="209">
-			</components:BtnChar>
+		<s:VGroup width="534" height="100%">
+			<w8ui:CharGroup id="charData" width="100%" height="200" visible="false" />
 			<s:Group width="100%" height="100%">
-				<s:Label right="0" bottom="0" color="#FEFDFD" fontFamily="BaseFont" fontSize="36"
-						 text="start" click="button1_clickHandler(event)" />
-				<s:Label y="92" right="128" width="374" text="Selected:" textAlign="right"/>
+				<s:Label right="0" bottom="0" chromeColor="#9B9B9B"
+						 click="button1_clickHandler(event)" color="#9B9B9B" fontFamily="Metro"
+						 fontSize="20" paddingBottom="6" paddingLeft="10" paddingRight="10"
+						 paddingTop="6" text="start" textAlign="center" verticalAlign="middle"/>
+				<s:Label y="92" right="128" width="374" color="#D95A00" fontFamily="Metro"
+						 fontSize="11" text="Selected: Keaira" textAlign="right"
+						 verticalAlign="middle"/>
 			</s:Group>
 		</s:VGroup>
 	</s:HGroup>

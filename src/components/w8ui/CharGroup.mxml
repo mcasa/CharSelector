@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="800" height="300" color="#ffffff">
+	<fx:Script>
+		<![CDATA[
+			
+			
+			import flash.display.Bitmap;
+			import flash.display.BitmapData;
+			import flash.display.Sprite;
+			import flash.events.Event;
+			import flash.filesystem.File;
+			import flash.filesystem.FileMode;
+			import flash.filesystem.FileStream;
+			import flash.utils.ByteArray;
+			import flash.utils.Endian;
+			
+			
+			[Bindable]public var nome:String;
+			[Bindable]public var lvl:Number;
+			[Bindable]public var race:String;
+			[Bindable]public var location:String;
+			[Bindable]public var sex:Number;
+			[Bindable]public var currentExp:Number;
+			[Bindable]public var nextLevExp:Number;
+			[Bindable]public var exp:Number;
+			[Bindable]public var bit:Bitmap;
+			[Bindable]public var fileName:String;
+			[Bindable]public var lastSave:String;
+			[Bindable]public var _isComplete:Boolean = false;
+			[Bindable]public var expPerc:String;
+			
+			[Bindable(event="DATA_COMPLETE")]
+			public function get isComplete():Boolean
+			{
+				
+				return _isComplete;
+				
+			}
+			
+			public function getProperty(prop:String):*
+			{
+				
+				return this['prop']
+				
+			}
+			
+			public  function load(file:File):void
+			{
+				
+				var inBytes:ByteArray = new ByteArray(); 
+				var inStream:FileStream = new FileStream();
+				var w:int;
+				var h:int;
+				var l:uint;
+				var tmpArr:ByteArray = new ByteArray()
+				var ni:int;
+				inBytes = new ByteArray()
+				inStream.open(file, FileMode.READ); 
+				inStream.readBytes(inBytes); 
+				trace("done")
+				inStream.close();
+				inBytes.endian = Endian.LITTLE_ENDIAN
+				inBytes.position = 0
+				trace('Constant', inBytes.readUTFBytes(13))
+				trace(inBytes.position)
+				trace('headerSize',inBytes.readInt())
+				trace(inBytes.position)
+				trace('version',inBytes.readInt())
+				trace(inBytes.position)
+				trace('saveNumber',inBytes.readInt())
+				trace(inBytes.position)
+				trace('playerName size', ni = inBytes.readShort())
+				trace(inBytes.position)
+				nome = inBytes.readUTFBytes(ni)
+				trace(inBytes.position)
+				trace('playerLevel', lvl = inBytes.readInt());
+				trace(inBytes.position);
+				trace('playerLocationSize', ni = inBytes.readShort())
+				trace(inBytes.position);
+				trace('playerLocation', location = inBytes.readUTFBytes(ni));
+				trace(inBytes.position);
+				trace('gameDateSize',ni = inBytes.readShort())
+				trace(inBytes.position);
+				trace('gameDate', inBytes.readUTFBytes(ni))
+				trace(inBytes.position);
+				trace('playerRaceSize',ni = inBytes.readShort())
+				trace(inBytes.position);
+				trace('playerRace',race = inBytes.readUTFBytes(ni))
+				trace(inBytes.position);
+				trace('playerSexs',sex = inBytes.readShort())
+				trace(inBytes.position);
+				trace("currentExp", currentExp = inBytes.readFloat())
+				trace(inBytes.position);
+				trace('nextLevelExp',nextLevExp = inBytes.readFloat())
+				trace(inBytes.position);
+				trace('fileTime',inBytes.readDouble())
+				trace(inBytes.position);
+				trace('shotWidth',w = inBytes.readInt())
+				trace(inBytes.position);
+				trace('shotheight',h = inBytes.readInt())
+				trace(inBytes.position);
+				l = 3*w*h
+				
+				var bitmapData:BitmapData;
+				var bitmapBA:ByteArray = new ByteArray();
+				var bitmap:Bitmap;
+				//bitmapBA.endian = Endian.LITTLE_ENDIAN
+				inBytes.readBytes(bitmapBA,0,l)
+				trace('screenShotData done')
+				trace(inBytes.position);
+				trace('formVersion',inBytes.readByte())
+				trace('21',inBytes.position);
+				bitmapData = new BitmapData(w, h);
+				bitmapBA.position = 0
+				bitmapBA.endian = Endian.LITTLE_ENDIAN
+				
+				for(var i:Number =0; i<h; i++)
+				{
+					for(var j:Number =0; j<w; j++)
+					{
+						var alphaValue = 0
+						var redValue = bitmapBA.readByte();
+						var greenValue = bitmapBA.readByte();
+						var blueValue = bitmapBA.readByte();
+						var color:uint = alphaValue << 32 | redValue << 16 | greenValue << 8 | blueValue;
+						bitmapData.setPixel(j,i,color);
+						//bitmapData.setPixel32(j,i, color);
+					}
+				}
+				
+				bitmapData.lock()
+				bit = new Bitmap(bitmapData)
+				lastSave = getRealDate(file.creationDate)
+				
+				/* }
+				catch(err:Error)
+				{
+				trace("Errore nel caricamento del file ")
+				} */
+				//fileName = "empty"
+				currentExp = 50
+				_isComplete = true
+				
+				linea.xTo = (250*currentExp)/nextLevExp
+				expPerc = (linea.xTo * 100 /250).toString() + "%"
+				dispatchEvent(new Event("DATA_COMPLETE"))
+				/*var tmpObj:Object = new Object;
+				tmpObj.nome = nome
+				tmpObj.lvl = lvl
+				tmpObj.location = location
+				tmpObj.race = race
+				tmpObj.sex = sex
+				tmpObj.currentExp = currentExp
+				tmpObj.nextLevExp = nextLevExp
+				tmpObj.img = bit
+				tmpObj.filePath = file.nativePath*/
+				
+				
+				
+			}
+			
+			private function getRealDate(date:Date):String
+			{
+				trace("date.hours",date.hours)
+				var str:String = doubleDigitFormat(date.hours)+":"+doubleDigitFormat(date.minutes) +' ' + weekDayLabels[date.day] + " " + date.date + " " + monthLabels[date.month] + " " + date.fullYear
+				return str
+			}
+			
+			private var monthLabels:Array = new Array("January",
+				"February",
+				"March",
+				"April",
+				"May",
+				"June",
+				"July",
+				"August",
+				"September",
+				"October",
+				"November",
+				"December");
+			
+			private var weekDayLabels:Array = new Array("Sunday",
+				"Monday",
+				"Tuesday",
+				"Wednesday",
+				"Thursday",
+				"Friday",
+				"Saturday");
+			
+			private function doubleDigitFormat(num:uint):String {
+				if(num < 10) {
+					return ("0" + num.toString());
+				}
+				return num.toString();
+			}
+			
+			private  function removeExtension(fileName:String):String
+			{
+				var i:Number = fileName.indexOf(".")
+				return fileName.substring(0,i)
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup x="0" y="0" width="100%" height="100%" gap="10">
+		<!--<s:Group>
+			<s:Rect left="0" right="0" top="0" bottom="0" visible="true">
+				<s:fill>
+					<s:SolidColor color="#3a3a3a" />
+				</s:fill>
+			</s:Rect>-->
+			<s:VGroup width="250" gap="0" horizontalAlign="center" verticalAlign="middle">
+				
+				
+				<s:BitmapImage id="bi" left="0" width="250" height="150" smooth="true" source="{bit}"
+							   smoothingQuality="high"/>
+				
+				<s:Group >
+					<s:Line id="lineabg" xFrom="{0}" xTo="{249}" yFrom="0" yTo="0">
+						<s:stroke>
+							<s:SolidColorStroke color="#3a3a3a" weight="3" caps="square"/>
+						</s:stroke>
+					</s:Line>
+					<s:Line id="linea" xFrom="{1}"  yFrom="0" yTo="0">
+						<s:stroke>
+							<s:SolidColorStroke color="#008286" weight="1" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:Group>
+				<!--<s:Label x="0" y="-5" width="50" justificationStyle="auto" paddingBottom="5"
+						 paddingLeft="5" paddingRight="5" paddingTop="5" text="{expPerc}"
+						 verticalAlign="middle" visible="false"/>-->
+				
+				<s:Label id="uilocation" width="100%" fontFamily="Metro" fontSize="20" fontWeight="bold" text="{location}"/>
+				<s:Label id="uilastSave" width="100%" fontFamily="Metro" fontSize="10" fontWeight="bold" color="#9b9b9b" text="{lastSave}"/>
+				
+			</s:VGroup>
+		<!--</s:Group>-->
+		<s:VGroup id="dati" width="100%" height="100%" verticalAlign="top" gap="2">
+			<s:Group>
+				<s:Rect left="0" right="0" top="0" bottom="0" visible="false">
+					<s:fill>
+						<s:SolidColor color="#1d1d1d" />
+					</s:fill>
+				</s:Rect>
+				<s:VGroup width="300" verticalAlign="middle" gap="0" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+					<s:Label id="uiNome" width="100%" text="{nome}" fontFamily="Metro" fontSize="20" fontWeight="bold"/>
+					<s:Label text="Name" fontSize="11" fontFamily="Metro" color="#9b9b9b"/>
+				</s:VGroup>
+			</s:Group>
+			<s:Group>
+				<s:Rect left="0" right="0" top="0" bottom="0" visible="false">
+					<s:fill>
+						<s:SolidColor color="#1d1d1d" />
+					</s:fill>
+				</s:Rect>
+				<s:VGroup width="300" verticalAlign="middle" gap="0" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+					<s:Label id="uilvl" width="100%" fontFamily="Metro" fontSize="20" fontWeight="bold"
+							 text="{lvl}"/>
+					<s:Label text="Level" fontSize="11" fontFamily="Metro" color="#9b9b9b"/>	
+				</s:VGroup>
+			</s:Group>
+			<s:Group>
+				<s:Rect left="0" right="0" top="0" bottom="0" visible="false">
+					<s:fill>
+						<s:SolidColor color="#1d1d1d" />
+					</s:fill>
+				</s:Rect>
+				<s:VGroup width="300" verticalAlign="middle" gap="0" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+					<s:Label id="uirace" width="100%" fontFamily="Metro" fontSize="20" fontWeight="bold"
+							 
+							 text="{race}"/>
+					<s:Label text="Race" fontSize="11" fontFamily="Segoeui" color="#9b9b9b"/>	
+				</s:VGroup>
+			</s:Group>
+			<!--<s:Group>
+			<s:Rect left="0" right="0" top="0" bottom="0" visible="false">
+			<s:fill>
+			<s:SolidColor color="#1d1d1d" />
+			</s:fill>
+			</s:Rect>
+			<s:VGroup width="300" verticalAlign="middle" gap="0" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+			<s:Label id="uilocation" width="100%" fontFamily="Metro" fontSize="20" fontWeight="bold"
+			
+			text="{location}"/>
+			<s:Label text="Location" fontSize="11" fontFamily="Metro"/>	
+			</s:VGroup>
+			</s:Group>-->
+			<!--<s:Group>
+			<s:Rect left="0" right="0" top="0" bottom="0" visible="false">
+			<s:fill>
+			<s:SolidColor color="#1d1d1d" />
+			</s:fill>
+			</s:Rect>
+			<s:VGroup width="300" verticalAlign="middle" gap="0" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+			<s:Label id="uilastSave" width="100%" fontFamily="Metro" fontSize="20" fontWeight="bold"
+			
+			text="{lastSave}"/>
+			<s:Label text="Date" fontSize="11" fontFamily="Segoeui"/>	
+			</s:VGroup>
+			</s:Group>-->
+		</s:VGroup>
+	</s:HGroup>
+</s:VGroup>

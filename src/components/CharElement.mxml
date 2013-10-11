@@ -6,8 +6,8 @@
 	<fx:Script>
 		<![CDATA[
 			import data.CharData;
-			[Bindable]private var nome:String;
-			[Bindable]private var lvl:Number;
+			private var nome:String;
+			private var lvl:Number;
 			public var charData:CharData;
 			public function setCharElement(char:CharData):void
 			{

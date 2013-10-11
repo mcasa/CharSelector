@@ -1,17 +1,23 @@
 package data
 {
+	import com.adobe.protocols.dict.Database;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
-	public class CharData extends Object
+	import mx.utils.ObjectProxy;
+	
+	public class CharData extends Sprite
 	{
 		
-		public var nome:String;
+		[Bindable]public var nome:String;
 		public var lvl:Number;
 		public var race:String;
 		public var location:String;
@@ -20,16 +26,20 @@ package data
 		public var nextLevExp:Number;
 		public var bit:Bitmap;
 		public var fileName:String;
+		public var lastSave:String;
+		public var _isComplete:Boolean = false;
 		
-		//private  var filePathSKSE:String;
-		
-	/*	private  var arrChar:Array;
-		private  var arrCharacterESS:Array = new Array;
-		private  var arrCharacterSKSE:Array = new Array;*/
-		
-		public function CharData(file:File):void
+		public function CharData(file:File= null):void
 		{
 			load(file)
+			
+		}
+		
+		[Bindable(event="DATA_COMPLETE")]
+		public function get isComplete():Boolean
+		{
+			
+			return _isComplete;
 			
 		}
 		
@@ -40,7 +50,7 @@ package data
 			
 		}
 		
-		private  function load(file:File):void
+		public  function load(file:File):void
 		{
 			try
 			{
@@ -127,14 +137,16 @@ package data
 				
 				bitmapData.lock()
 				bit = new Bitmap(bitmapData)
+				lastSave = getRealDate(file.creationDate)
 				
 			}
 			catch(err:Error)
 			{
-				trace("Errore nel caricamento del file " + file.nativePath)
+				trace("Errore nel caricamento del file ")
 			}
-			fileName = removeExtension(file.nativePath)
-			
+			fileName = "empty"
+			_isComplete = true
+			dispatchEvent(new Event("DATA_COMPLETE"))
 			/*var tmpObj:Object = new Object;
 			tmpObj.nome = nome
 			tmpObj.lvl = lvl
@@ -148,6 +160,40 @@ package data
 
 			
 			
+		}
+		
+		private function getRealDate(date:Date):String
+		{
+			var str:String = doubleDigitFormat(date.hours)+":"+doubleDigitFormat(date.minutes) +' ' + weekDayLabels[date.day] + " " + date.date + " " + monthLabels[date.month] + " " + date.fullYear
+			return str
+		}
+		
+		private var monthLabels:Array = new Array("January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December");
+
+		private var weekDayLabels:Array = new Array("Sunday",
+			"Monday",
+			"Tuesday",
+			"Wednesday",
+			"Thursday",
+			"Friday",
+			"Saturday");
+		
+		private function doubleDigitFormat(num:uint):String {
+			if(num < 10) {
+				return ("0" + num);
+			}
+			return num as String;
 		}
 		
 		private  function removeExtension(fileName:String):String

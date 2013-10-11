@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" color="#ffffff">
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
 	<fx:Script>
 		<![CDATA[
 			import data.CharData;
@@ -20,31 +20,38 @@
 			
 			private var inBytes:ByteArray = new ByteArray(); 
 			
-			private var nome:String;
-			private var lvl:Number;
-			private var race:String;
-			private var location:String;
-			private var sex:String;
-			private var currentExp:Number;
-			private var nextLevExp:Number;
+
+			[Bindable]private var currentExp:Number;
+			[Bindable]private var nextLevExp:Number;
 			private var bit:Bitmap;
 			private var myShadow:spark.filters.DropShadowFilter = new DropShadowFilter();
-			[Bindable]private var shadow:Array = [myShadow]
+			private var lastSave:String;
+			private var charFileData:CharData
 			
-			public function setData(charFileData:CharData):void
+			public function setData(file:File):void
 			{
-				nome = charFileData.nome;
-				lvl = charFileData.lvl;
-				race = charFileData.race;
-				location = charFileData.location;
-				if(charFileData.sex==0)
-					sex = 'M' 
+				trace("AAAAAAAA")
+				charFileData = new CharData()
+				charFileData.load(file)
+				charFileData.addEventListener("DATA_COMPLETE", dataComplete)
+			}
+			
+			private function dataComplete(eve:Event):void{
+				trace("COMPLETE")
+				this.uiNome.text = charFileData.nome;
+				this.uilvl.text = charFileData.lvl.toString();
+				this.uirace.text = charFileData.race;
+				this.uilocation.text = charFileData.location;
+				/* if(charFileData.sex==0)
+					this.uisex.text = 'M' 
 				else
-					sex = 'F';
+					this.uisex.text = 'F'; */
 				currentExp = charFileData.currentExp;
-				nestLevel = charFileData.nextLevExp;
-				bit = charFileData.bit;
-				this.dati.filters = [myShadow];
+				nextLevExp = charFileData.nextLevExp;
+				this.uilastSave.text = charFileData.lastSave
+				
+				this.bi.source = charFileData.bit;
+				//this.dati.filters = [myShadow];
 				
 				
 			}
@@ -53,41 +60,44 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	
-	<s:VGroup id="dati" verticalAlign="middle" left="10" >
-		<s:BitmapImage  id="bi" width="180" height="108" scaleMode="zoom" />
-		<s:HGroup >
-			<s:Label text="Name:"  />
-			<s:Label fontFamily="MorrisRomanBlack" text="{nome}" fontSize="18"/>
-		</s:HGroup>
-		<s:HGroup verticalAlign="middle">
-			<s:Label text="Level:"  />
-			<s:Label fontFamily="MorrisRomanBlack" text="{lvl}" fontSize="18" />
-			<s:Group verticalCenter="0">
-			<s:Line id="lineabg" xFrom="{0}" xTo="{101}" yFrom="0" yTo="0">
-
-				<s:stroke>
-					<s:SolidColorStroke color="0x000000" weight="10" caps="round"/>
-				</s:stroke>
-			</s:Line>
-			<s:Line id="linea" xFrom="{1}" xTo="{currentExp}" yFrom="0" yTo="0">
-				
-				<s:stroke>
-					<s:SolidColorStroke color="#00ccff" weight="5" caps="round"/>
-				</s:stroke>
-			</s:Line>
-				
+	<s:HGroup x="0" y="0" width="100%" height="150">
+		<s:VGroup >
+			<s:BitmapImage  id="bi" width="250" height="150" scaleMode="zoom" />
+			<s:Group width="100%">
+				<s:Line id="lineabg" xFrom="{0}" xTo="{101}" yFrom="0" yTo="0">
+					<s:stroke>
+						<s:SolidColorStroke color="0x000000" weight="10" caps="round"/>
+					</s:stroke>
+				</s:Line>
+				<s:Line id="linea" xFrom="{1}" xTo="{currentExp}" yFrom="0" yTo="0">
+					<s:stroke>
+						<s:SolidColorStroke color="#00ccff" weight="5" caps="round"/>
+					</s:stroke>
+				</s:Line>
 			</s:Group>
-			
-		</s:HGroup>
-		<s:HGroup >
-			<s:Label text="Race:"  />
-			<s:Label fontFamily="MorrisRomanBlack" text="{race}" fontSize="18"/>
-		</s:HGroup>
-		<s:HGroup >
-			<s:Label text="Location:"  />
-			<s:Label fontFamily="MorrisRomanBlack" text="{location}" fontSize="18"/>
-		</s:HGroup>
-		<s:TextArea id="logger" height="300" verticalScrollPolicy="auto" color="#000000" visible="false"/>
-	</s:VGroup>
+		</s:VGroup>
+		<s:VGroup id="dati" left="10" width="100%" height="100%" verticalAlign="top">
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:TextArea text="Name:"  />
+				<s:TextArea id="uiNome" width="100%" fontFamily="MorrisRomanBlack" fontSize="18"/>
+			</s:HGroup>
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label text="Level:"  />
+				<s:Label width="100%" fontFamily="MorrisRomanBlack" fontSize="18" id="uilvl"/>
+			</s:HGroup>
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label text="Race:"  />
+				<s:Label width="100%" fontFamily="MorrisRomanBlack" fontSize="18" id="uirace"/>
+			</s:HGroup>
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label text="Location:"  />
+				<s:Label id="uilocation" width="100%" fontFamily="MorrisRomanBlack" fontSize="18"/>
+			</s:HGroup>
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label text="Last Save:"  />
+				<s:Label id="uilastSave" width="100%" fontFamily="MorrisRomanBlack" fontSize="18"/>
+			</s:HGroup>
+			<s:TextArea id="logger" height="300" verticalScrollPolicy="auto" color="#000000" visible="false"/>
+		</s:VGroup>
+	</s:HGroup>
 </s:Group>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
-					   xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:components="components.*"  backgroundColor="#726B6B">
+					   xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:components="components.*"  backgroundColor="#726B6B" xmlns:w8ui="components.w8ui.*">
 	<fx:Script>
 		<![CDATA[
 			import components.CharList;
@@ -11,14 +11,8 @@
 			
 			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 			{
-				var file:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+ "/Chars")
-				var arr:Array = file.getDirectoryListing()
-				// TODO Auto-generated method stub
-				for(var i:Number = 0; i<arr.length; i++)
-				{
-					var charList:CharList = new CharList()
-				//		charList.setList()
-				}
+				var file:File = new File(ConfigProperties.getProperty(ConfigProperties.SAVEPATH)+ "/Saves/Save 12 - Keaira  Prison Cell  00.15.47.ess")
+				char.load(file)
 				
 			}
 			
@@ -27,5 +21,5 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	<components:CharElement width="200" id="char"/>
+	<w8ui:CharGroup width="100%" id="char" left="10"/>
 </s:WindowedApplication>
