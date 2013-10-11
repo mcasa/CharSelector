@@ -19,6 +19,27 @@
 			embed-as-cff : true;
 			fontWeight: normal;
 		}
+		@font-face{
+			src:url("font/segoeui.ttf");
+			fontFamily: "Segoeui";
+			embed-as-cff : true;
+			fontWeight: normal;
+		}
+		
+		@font-face{
+			src:url("font/weblysleekuil.ttf");
+			fontFamily: "Metro";
+			embed-as-cff : true;
+			fontWeight: normal;
+		}
+		
+		@font-face{
+			src:url("font/CartoGothicStd-Book.otf");
+			fontFamily: "Metro";
+			embed-as-cff : true;
+			fontWeight: bold;
+		}
+		
 		
 	</fx:Style>
 	<fx:Script>

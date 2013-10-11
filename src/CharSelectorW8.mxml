@@ -303,7 +303,7 @@
 					var selectedFile:File = arr[0]
 					for(var i:Number = 1; i<arr.length; i++)
 					{
-							if(arr[i].creationDate<selectedFile.creationDate)
+							if(arr[i].creationDate>selectedFile.creationDate)
 								selectedFile = arr[i]
 						
 					}
@@ -612,10 +612,7 @@
 		
 	</s:VGroup>
 	<s:VGroup includeIn="config,splash,use" width="100%" height="100%">
-		<components:FilesProgressBar id="progressAction" width="100%"
-									 bottom.config="0"
-									 bottom.splash="0"
-									 bottom.use="0"/>
+		
 		<s:TextArea includeIn="use" top="0" width="100%" borderVisible="false" color="#FDF9F9"
 					contentBackgroundAlpha="0.0" contentBackgroundColor="#726B6B" editable="false"
 					filters="{shadow}" fontFamily="BaseFont" fontSize="24" selectable="false"
@@ -665,15 +662,46 @@
 		</s:VGroup>
 		<s:VGroup width="534" height="100%">
 			<w8ui:CharGroup id="charData" width="100%" height="200" visible="false" />
-			<s:Group width="100%" height="100%">
-				<s:Label right="0" bottom="0" chromeColor="#9B9B9B"
-						 click="button1_clickHandler(event)" color="#9B9B9B" fontFamily="Metro"
-						 fontSize="20" paddingBottom="6" paddingLeft="10" paddingRight="10"
-						 paddingTop="6" text="start" textAlign="center" verticalAlign="middle"/>
-				<s:Label y="92" right="128" width="374" color="#D95A00" fontFamily="Metro"
-						 fontSize="11" text="Selected: Keaira" textAlign="right"
-						 verticalAlign="middle"/>
-			</s:Group>
+			
 		</s:VGroup>
+		<s:Group right="0" bottom="0">
+			<s:Rect left="0" right="0" top="0" bottom="0" visible="false">
+				<s:fill>
+					<s:SolidColor color="#ffffff" />
+				</s:fill>
+				<s:stroke>
+					<s:SolidColorStroke color="#ff0000" weight="1" caps="square"/>
+				</s:stroke>
+			</s:Rect>
+			<s:Label 
+				click="button1_clickHandler(event)" color="#9B9B9B" fontFamily="Metro"
+				fontSize="20" paddingBottom="6" paddingLeft="10" paddingRight="10"
+				paddingTop="6" text="start" textAlign="center" verticalAlign="middle"/>
+			<!--<s:Label y="92" right="128" width="374" color="#D95A00" fontFamily="Metro"
+			fontSize="11" text="Selected: Keaira" textAlign="right"
+			verticalAlign="middle"/>-->
+			
+		</s:Group>
 	</s:HGroup>
+	<s:Group width="100" height="100" right="0" bottom="0" includeIn="main">
+		<s:Rect left="0" right="0" top="0" bottom="0" visible="false">
+			<s:fill>
+				<s:SolidColor color="#ffffff" />
+			</s:fill>
+			<s:stroke>
+				<s:SolidColorStroke color="#ff0000" weight="1" caps="square"/>
+			</s:stroke>
+		</s:Rect>
+		<s:Label 
+			click="button1_clickHandler(event)" color="#9B9B9B" fontFamily="Metro"
+			fontSize="20" paddingBottom="6" paddingLeft="10" paddingRight="10"
+			paddingTop="6" text="start" textAlign="center" verticalAlign="middle"/>
+		<!--<s:Label y="92" right="128" width="374" color="#D95A00" fontFamily="Metro"
+		fontSize="11" text="Selected: Keaira" textAlign="right"
+		verticalAlign="middle"/>-->
+		
+	</s:Group>
+	<components:FilesProgressBar id="progressAction" width="100%"
+								 
+								 bottom="0"/>
 </s:WindowedApplication>
